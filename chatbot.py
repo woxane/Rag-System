@@ -2,7 +2,7 @@ from openai import OpenAI
 
 class Chatbot:
     def __init__(self, openAI_base_url, openAI_api_key, model_name):
-        self.openAi = OpenAI(openAI_base_url , openAI_api_key)
+        self.openAi = OpenAI(base_url=openAI_base_url , api_key=openAI_api_key)
         self.model_name = model_name
 
     def create_prompt(self, context, user_query):
@@ -13,7 +13,7 @@ class Chatbot:
             model = self.model_name,
             messages = messages,
             temperature = temperature,
-            steram=stream
+            stream=stream
         )
 
         return completion
