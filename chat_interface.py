@@ -56,8 +56,9 @@ class ChatInterface:
                     completion = self.chatbot.get_response(messages)
 
                     for response in completion:
-                        full_response += response.choices[0].delta.content
-                        message_placeholder.markdown(full_response + "▌")
+                        if response.choices[0].delta.content:
+                            full_response += response.choices[0].delta.content
+                            message_placeholder.markdown(full_response + "▌")
 
                     message_placeholder.markdown(full_response)
 
