@@ -8,14 +8,12 @@ class Chatbot:
     def create_prompt(self, context, user_query):
         return f"Using the context provided, answer the question: {user_query}\n\nContext:\n{context}\n\nAnswer:"
 
-    def get_response(self, prompt , temperature = 0.7):
+    def get_response(self, messages, temperature=0.7, stream=True):
         completion = self.openAi.chat.completions.create(
             model = self.model_name,
-            messages = [
-                {"role": "system", "content": "You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful."},
-                {"role": "user", "content": prompt}
-            ],
+            messages = messages,
             temperature = temperature,
+            steram=stream
         )
-        response = completion.choices[0].message
-        return response.content
+
+        return completion
