@@ -3,7 +3,7 @@ from pymilvus import MilvusClient
 
 
 class MilvusHandler:
-    def __init__(self, collection_name, dimensions, milvus_uri="http://localhost:1953"):
+    def __init__(self, collection_name, dimensions, milvus_uri="http://localhost:19530"):
         self.milvus_client = MilvusClient(milvus_uri)
         self.collection_name = collection_name
         self.dimensions = dimensions
@@ -20,6 +20,8 @@ class MilvusHandler:
             {"id": i, "vector": vectors[i], "text": chunks[i], "subject": "history"}
             for i in range(len(vectors))
         ]
+
+        print(data)
         self.milvus_client.insert(collection_name=self.collection_name, data=data)
 
     def search_vectors(self, query_vector, top_k=3):
