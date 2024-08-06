@@ -45,7 +45,7 @@ class ChatInterface:
 
             with st.chat_message("assistant"):
                 message_placeholder = st.empty()
-                full_response = "hi fuck"
+                full_response = ""
                 messages = [ {"role": message["role"], "content": message["rag_prompt"] if message["role"] == "user" else message["content"]} for message in st.session_state.messages ]
                 completion = self.chatbot.get_response(messages)
 
