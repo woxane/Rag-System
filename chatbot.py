@@ -27,7 +27,7 @@ class Chatbot:
             models = [data.id for data in openai.models.list().data]
 
             if model_name in models:
-                return True
+                return False
 
             else:
                 return "Model name provided is not in the list !"
