@@ -23,6 +23,9 @@ def main():
 
 
 def setup_env():
+    print("Suppose this is your first time running the app!")
+    print("Please answer the above question for configuration :")
+
     #DocumentProcessor params part
     chunk_size = size if (size := input("Enter chunk size for text split function (Enter for 256) : ")) else 256
     set_key(dotenv_path , 'chunk_size' , chunk_size)
@@ -50,6 +53,7 @@ def setup_env():
 
 
 def update_env():
+    print("Updating Configuration ... ")
     env_values: OrderedDict = dotenv_values(dotenv_path)
 
     for key in env_values:
@@ -92,7 +96,24 @@ def check_env() -> list[Any]:
 
 
 if __name__ == "__main__":
+    print("Welcome to Rag System project !")
+
     if not load_dotenv(dotenv_path):
         setup_env()
+
+    option = int(input("1) Update configuration\n2) Continue to run app"))
+    while option not in (1,2):
+        print("Invalid input!")
+        option = int(input("1) Update configuration\n2) Continue to run app"))
+
+    if option == 1:
+        update_env()
+
+    errors = check_env()
+    while errors:
+        print("Unfortunately there are some errors with your configuration : ")
+        print('\n\n'.join(errors))
+        update_env()
+        errors = check_env()
 
     main()
