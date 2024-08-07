@@ -14,7 +14,7 @@ def main():
 
     document_processor = DocumentProcessor(chunk_size=env_values['chunk_size'], chunk_overlap=env_values['chunk_overlap'])
     vectorizer = Vectorizer(model_name=env_values['embedding_model_name'])
-    milvus_handler = MilvusHandler(collection_name=env_values['collection_name'], dimensions=env_values["dimension"], milvus_uri=env_values['milvus_uri'])
+    milvus_handler = MilvusHandler(collection_name=env_values['collection_name'], dimensions=vectorizer.dimension, milvus_uri=env_values['milvus_uri'])
     chatbot = Chatbot(openAI_base_url=env_values['openAI_base_url'],
                       openAI_api_key=env_values['openAI_base_url'],
                       model_name=env_values['LLM_model_name'])
@@ -36,8 +36,6 @@ def setup_env():
     #MilvusHandler params part
     collection_name = input("Enter collection name for Milvus db : ")
     set_key(dotenv_path , 'collection_name' , collection_name)
-    dimension = input("Enter number of dimension for your db (it must match with the word embedding model) : ")
-    set_key(dotenv_path , 'dimension' , dimension)
     milvus_uri = input("Enter your milvus uri : ")
     set_key(dotenv_path , 'milvus_uri' , milvus_uri)
 
