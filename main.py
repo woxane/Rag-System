@@ -5,6 +5,7 @@ from chatbot import Chatbot
 from chat_interface import ChatInterface
 from dotenv import load_dotenv, set_key, dotenv_values
 from collections import OrderedDict
+from typing import List, Any
 
 dotenv_path = ".env"
 
@@ -59,6 +60,37 @@ def update_env():
         if is_edit:
             updated_value: str = input(f"Enter updated value for {env_values[key]} : ")
             set_key(dotenv_path, key, updated_value)
+
+
+def check_env() -> list[Any]:
+    env_values: OrderedDict = dotenv_values(dotenv_path)
+    errors: list = []
+
+    chunk_size: str = env_values['chunk_size']
+    chunk_overlap: str = env_values['chunk_overlap']
+    try:
+        int(chunk_size)
+        int(chunk_overlap)
+
+    except ValueError as e:
+        errors.append("chunk_size or chunk_overlap is invalid : \n\te")
+
+    embedding_model_name: str = env_values["embedding_model_name"]
+    if error := Vectorizer.check_model_name(model_name=embedding_model_name):
+        errors.append(error)
+
+    milvus_uri: str = env_values["milvus_uri"]
+    if error := MilvusHandler.check_milvus_uri(milvus_uri=milvus_uri):
+        errors.append(error)
+
+    openAI_base_url: str = env_values["openAI_base_url"]
+    openAI_api_key: str = env_values["openAI_api_key"]
+    LLM_model_name: str = env_values["LLM_model_name"]
+
+    if error := Chatbot.check_chatbot_params(base_url=openAI_base_url, api_key=openAI_api_key, model_name=LLM_model_name):
+        errors.append(error)
+
+    return errors
 
 
 if __name__ == "__main__":
