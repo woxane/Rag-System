@@ -17,3 +17,20 @@ class Chatbot:
         )
 
         return completion
+
+
+    @staticmethod
+    def check_chatbot_params(base_url: str, api_key: str, model_name: str) -> bool | str:
+        openai = OpenAI(base_url=base_url, api_key=api_key)
+
+        try:
+            models = [data.id for data in openai.models.list().data]
+
+            if model_name in models:
+                return True
+
+            else:
+                return "Model name provided is not in the list !"
+
+        except Exception as e:
+            return str(e)
