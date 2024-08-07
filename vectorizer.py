@@ -6,3 +6,11 @@ class Vectorizer:
 
     def vectorize(self, docs):
         return self.model.encode(docs)
+
+    @staticmethod
+    def check_model_name(model_name: str) -> bool:
+        try:
+            SentenceTransformer(model_name)
+            return True
+        except:
+            return False
