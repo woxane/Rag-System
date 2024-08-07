@@ -50,5 +50,7 @@ def setup_env():
 
 
 if __name__ == "__main__":
-    load_dotenv(dotenv_path)
+    if not load_dotenv(dotenv_path):
+        setup_env()
+
     main()
