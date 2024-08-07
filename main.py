@@ -9,10 +9,14 @@ from dotenv import load_dotenv, set_key, dotenv_values
 dotenv_path = ".env"
 
 def main():
-    document_processor = DocumentProcessor()
-    vectorizer = Vectorizer()
-    milvus_handler = MilvusHandler("RAG_test", 384)
-    chatbot = Chatbot("http://localhost:1234/v1", "lm-studio", 'lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF')
+    env_values = dotenv_values(dotenv_path)
+
+    document_processor = DocumentProcessor(chunk_size=env_values['chunk_size'], chunk_overlap=env_values['chunk_overlap'])
+    vectorizer = Vectorizer(model_name=env_values['embedding_model_name'])
+    milvus_handler = MilvusHandler(collection_name=env_values['collection_name'], dimensions=env_values["dimension"], milvus_uri=env_values['milvus_uri'])
+    chatbot = Chatbot(openAI_base_url=env_values['openAI_base_url'],
+                      openAI_api_key=env_values['openAI_base_url'],
+                      model_name=env_values['LLM_model_name'])
     chat_interface = ChatInterface(document_processor, vectorizer, milvus_handler, chatbot)
     chat_interface.run()
 
