@@ -1,3 +1,5 @@
+from typing import Tuple, Type
+
 from pymilvus import MilvusClient
 
 
@@ -32,3 +34,12 @@ class MilvusHandler:
             output_fields=["text", "subject"],
         )
         return results
+
+
+    @staticmethod
+    def check_milvus_uri(milvus_uri: str) -> str:
+        try:
+            MilvusClient(uri=milvus_uri)
+            return ""
+        except Exception as e:
+            return str(e)
