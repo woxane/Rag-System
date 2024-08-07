@@ -4,7 +4,7 @@ from milvus_handler import MilvusHandler
 from chatbot import Chatbot
 from chat_interface import ChatInterface
 from dotenv import load_dotenv, set_key, dotenv_values
-
+from collections import OrderedDict
 
 dotenv_path = ".env"
 
@@ -47,6 +47,18 @@ def setup_env():
     set_key(dotenv_path , 'openAI_api_key' , openAI_api_key)
     LLM_model_name = input("Enter LLM model name : ")
     set_key(dotenv_path , 'LLM_model_name' , LLM_model_name)
+
+
+
+def update_env():
+    env_values: OrderedDict = dotenv_values(dotenv_path)
+
+    for key in env_values:
+        is_edit: bool = True if input(f"Value for {key} is {env_values[key]} Want to edit it ? (y/N)") else False
+
+        if is_edit:
+            updated_value: str = input(f"Enter updated value for {env_values[key]} : ")
+            set_key(dotenv_path, key, updated_value)
 
 
 if __name__ == "__main__":
