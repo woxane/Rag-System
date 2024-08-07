@@ -8,9 +8,9 @@ class Vectorizer:
         return self.model.encode(docs)
 
     @staticmethod
-    def check_model_name(model_name: str) -> bool:
+    def check_model_name(model_name: str) -> str:
         try:
             SentenceTransformer(model_name)
-            return True
-        except:
-            return False
+            return ""
+        except Exception as e:
+            return e
