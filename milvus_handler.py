@@ -5,7 +5,7 @@ from pymilvus import MilvusClient
 
 
 class MilvusHandler:
-    def __init__(self, collection_name, dimensions, milvus_uri="http://localhost:19530"):
+    def __init__(self, collection_name, dimensions, milvus_uri):
         self.milvus_client = MilvusClient(milvus_uri)
         self.collection_name = collection_name
         self.dimensions = dimensions
