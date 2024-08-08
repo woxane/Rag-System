@@ -25,12 +25,12 @@ class Chatbot:
 
         try:
             models = [data.id for data in openai.models.list().data]
-
-            if model_name in models:
-                return False
-
-            else:
-                return "Model name provided is not in the list !"
+            return False
+            # if model_name in models:
+            #     return False
+            #
+            # else:
+            #     return "Model name provided is not in the list !"
 
         except Exception as e:
             return str(e)
