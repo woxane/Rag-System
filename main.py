@@ -12,8 +12,8 @@ dotenv_path = ".env"
 def main():
     env_values = dotenv_values(dotenv_path)
 
-    document_processor = DocumentProcessor(chunk_size=env_values['chunk_size'],
-                                           chunk_overlap=env_values['chunk_overlap'])
+    document_processor = DocumentProcessor(chunk_size=int(env_values['chunk_size']),
+                                           chunk_overlap=int(env_values['chunk_overlap']))
     vectorizer = Vectorizer(model_name=env_values['embedding_model_name'])
     milvus_handler = MilvusHandler(collection_name=env_values['collection_name'],
                                    dimensions=vectorizer.dimension,
@@ -81,19 +81,24 @@ def check_env() -> list[Any]:
     chunk_size: str = env_values['chunk_size']
     chunk_overlap: str = env_values['chunk_overlap']
     try:
-        int(chunk_size)
-        int(chunk_overlap)
+        if (int(chunk_overlap) > int(chunk_size)):
+            errors.append(f"chunk_size is less than chunk_overlap!: \n\t{e}")
 
     except ValueError as e:
-        errors.append("chunk_size or chunk_overlap is invalid : \n\te")
+        errors.append(f"chunk_size or chunk_overlap is invalid : \n\t{e}")
+
+    print("chunk_size and chunk_overlap checked!")
 
     embedding_model_name: str = env_values["embedding_model_name"]
     if error := Vectorizer.check_model_name(model_name=embedding_model_name):
         errors.append(error)
+    print("embedding model name checked!")
 
     milvus_uri: str = env_values["milvus_uri"]
     if error := MilvusHandler.check_milvus_uri(milvus_uri=milvus_uri):
         errors.append(error)
+
+    print("milvus uri checked!")
 
     openAI_base_url: str = env_values["openAI_base_url"]
     openAI_api_key: str = env_values["openAI_api_key"]
@@ -102,6 +107,7 @@ def check_env() -> list[Any]:
     if error := Chatbot.check_chatbot_params(base_url=openAI_base_url, api_key=openAI_api_key, model_name=LLM_model_name):
         errors.append(error)
 
+    print("open ai base url and api key with LLM model name checked!")
     return errors
 
 
