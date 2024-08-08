@@ -74,6 +74,7 @@ def update_env():
 
 
 def check_env() -> list[Any]:
+    print("Start to checking parameters ...")
     env_values: OrderedDict = dotenv_values(dotenv_path)
     errors: list = []
 
@@ -109,6 +110,7 @@ if __name__ == "__main__":
 
     if not load_dotenv(dotenv_path):
         setup_env()
+        print("Setup configuration has completed!")
 
     option = int(input("1) Update configuration\n2) Continue to run app\nEnter your choice : "))
     while option not in (1,2):
@@ -117,6 +119,7 @@ if __name__ == "__main__":
 
     if option == 1:
         update_env()
+        print("Updating configuration has completed!")
 
     errors = check_env()
     while errors:
