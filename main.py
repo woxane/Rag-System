@@ -118,7 +118,7 @@ if __name__ == "__main__":
         setup_env()
         print("Setup configuration has completed!")
 
-    option = int(input("1) Update configuration\n2) Continue to run app\nEnter your choice : "))
+    option = input("1) Update configuration\n2) Continue to run app\nEnter your choice : ")
     while option not in (1,2):
         print("Invalid input!")
         option = int(input("1) Update configuration\n2) Continue to run app"))
