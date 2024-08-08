@@ -36,21 +36,27 @@ def setup_env():
     set_key(dotenv_path , 'chunk_overlap' , chunk_overlap)
 
     #Vectorizer param part
-    embedding_model_name = model if (model := input("Enter model name for word embedding (Enter for sentence-transformers/all-MiniLM-L6-v2) : ")) else "sentence-transformers/all-MiniLM-L6-v2"
+    embedding_model_name = model if (model := input("Enter model name for word embedding"
+        " (Enter for sentence-transformers/all-MiniLM-L6-v2) : "))\
+        else "sentence-transformers/all-MiniLM-L6-v2"
     set_key(dotenv_path , 'embedding_model_name' , embedding_model_name)
 
     #MilvusHandler params part
     collection_name = name if (name := input("Enter collection name for Milvus db (Enter for Test) : ")) else "Test"
     set_key(dotenv_path , 'collection_name' , collection_name)
-    milvus_uri = uri if (uri := input("Enter your milvus uri (Enter for http://localhost:19530) : ")) else "http://localhost:19530"
+    milvus_uri = uri if (uri := input("Enter your milvus uri (Enter for http://localhost:19530) : "))\
+        else "http://localhost:19530"
     set_key(dotenv_path , 'milvus_uri' , milvus_uri)
 
     #Chatbot params part
-    openAI_base_url = url if (url := input("Enter open ai url to connect (Enter for http://localhost:1234/v1) : ")) else "http://localhost:1234/v1"
+    openAI_base_url = url if (url := input("Enter open ai url to connect (Enter for http://localhost:1234/v1) : "))\
+        else "http://localhost:1234/v1"
     set_key(dotenv_path , 'openAI_base_url' , openAI_base_url)
     openAI_api_key = key if (key := input("Enter your open ai api key (Enter for lm-studio) : ")) else "lm-studio"
     set_key(dotenv_path , 'openAI_api_key' , openAI_api_key)
-    LLM_model_name = name if (name := input("Enter LLM model name (Enter for lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF) : ")) else "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF"
+    LLM_model_name = name if (name := input("Enter LLM model name "
+        "(Enter for lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF) : "))\
+        else "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF"
     set_key(dotenv_path , 'LLM_model_name' , LLM_model_name)
 
 
@@ -114,7 +120,8 @@ if __name__ == "__main__":
 
     errors = check_env()
     while errors:
-        print("Unfortunately there are some errors with your configuration : ")
+        print("Unfortunately there are some errors with your configuration."
+              " Make sure Milvus and lm-studio (if you are using it) is up : ")
         print('\n\n'.join(errors))
         update_env()
         errors = check_env()
