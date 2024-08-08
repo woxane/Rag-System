@@ -82,7 +82,7 @@ def check_env() -> list[Any]:
     chunk_overlap: str = env_values['chunk_overlap']
     try:
         if (int(chunk_overlap) > int(chunk_size)):
-            errors.append(f"chunk_size is less than chunk_overlap!: \n\t{e}")
+            errors.append(f"chunk_size is less than chunk_overlap!")
 
     except ValueError as e:
         errors.append(f"chunk_size or chunk_overlap is invalid : \n\t{e}")
