@@ -135,4 +135,5 @@ if __name__ == "__main__":
         update_env()
         errors = check_env()
 
+    print("All done!")
     main()
