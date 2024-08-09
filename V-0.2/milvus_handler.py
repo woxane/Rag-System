@@ -17,9 +17,9 @@ class MilvusHandler:
             dimension=self.dimensions,
         )
 
-    def save_vectors(self, vectors, chunks):
+    def save_vectors(self, vectors, chunks, file_id):
         data = [
-            {"id": i, "vector": vectors[i], "text": chunks[i], "subject": "history"}
+            {"id": i, "vector": vectors[i], "text": chunks[i], "subject": "history", "file_group": file_id}
             for i in range(len(vectors))
         ]
 
