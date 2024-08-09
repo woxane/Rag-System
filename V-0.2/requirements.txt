@@ -1,0 +1,6 @@
+PyMuPDF==1.24.9
+langchain==0.2.12
+openai==1.39.0
+pymilvus==2.4.0
+sentence_transformers==3.0.1
+streamlit==1.37.0
