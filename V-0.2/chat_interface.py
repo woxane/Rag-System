@@ -41,7 +41,7 @@ class ChatInterface:
                 for id in st.session_state.files_id:
                     if id not in uploaded_ids:
                         #This file has deleted
-                        #TODO: create delete rows with group_id
+                        self.milvus_handler.delete_vectors(id)
                         st.session_state.files_id.remove(id)
 
                 for file in uploaded_files:
@@ -49,12 +49,14 @@ class ChatInterface:
                         #New file uploaded
                         chunks = self.document_processor.load_pdf(file)
                         vectors = self.vectorizer.vectorize(chunks)
-                        self.milvus_handler.save_vectors(vectors, chunks)
+                        self.milvus_handler.save_vectors(vectors, chunks, file.file_id)
 
                         st.success("PDF files uploaded successfully!")
             else:
                 #Delete last remaining id
-                #TODO: create delete rows with group_id
+                for id in st.session_state.files_id:
+                    self.milvus_handler.delete_vectors(id)
+
                 st.session_state.files_id = []
 
         self.display_chat(st.session_state.messages)
