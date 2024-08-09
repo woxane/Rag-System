@@ -32,12 +32,16 @@ class ChatInterface:
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
+        if "file_names" not in st.session_state:
+            st.session_state.file_names = []
+
         with st.sidebar:
             st.header("Upload PDF Files")
             uploaded_files = st.file_uploader("Choose PDF files", type="pdf", accept_multiple_files=True)
             uploaded_ids = [file.file_id for file in uploaded_files]
 
             if uploaded_files:
+                current_files = []
                 for id in st.session_state.files_id:
                     if id not in uploaded_ids:
                         #This file has deleted
@@ -45,11 +49,13 @@ class ChatInterface:
                         st.session_state.files_id.remove(id)
 
                 for file in uploaded_files:
+                    current_files.append(file.name)
                     if file.file_id not in st.session_state.files_id:
                         #New file uploaded
                         chunks = self.document_processor.load_pdf(file)
                         vectors = self.vectorizer.vectorize(chunks)
                         self.milvus_handler.save_vectors(vectors, chunks, file.file_id)
+                        st.session_state.file_names.append(file.name)
 
                         st.success("PDF files uploaded successfully!")
             else:
@@ -58,6 +64,13 @@ class ChatInterface:
                     self.milvus_handler.delete_vectors(id)
 
                 st.session_state.files_id = []
+
+            st.write("File status:")
+            for file_name in st.session_state.file_names:
+                if uploaded_files and file_name in current_files:
+                    st.write(f"{file_name}")
+                else:
+                    st.write(f"{file_name} - Removed")
 
         self.display_chat(st.session_state.messages)
 
