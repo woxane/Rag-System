@@ -5,12 +5,22 @@ from dotenv import load_dotenv, set_key, dotenv_values
 from collections import OrderedDict
 from typing import List, Any
 from os import system
+from milvus_handler import MilvusHandler
 
 dotenv_path = ".env"
 
 def main():
-    system("streamlit run chat_interface.py")
+    env_values = dotenv_values(dotenv_path)
 
+    vectorizer = Vectorizer(model_name=env_values['embedding_model_name'])
+    milvus_handler = MilvusHandler(collection_name=env_values['collection_name'],
+                                   dimensions=vectorizer.dimension,
+                                   milvus_uri=env_values['milvus_uri'])
+
+    milvus_handler.reset_database()
+
+
+    system("streamlit run chat_interface.py")
 
 def setup_env():
     print("Suppose this is your first time running the app!")
@@ -114,13 +124,13 @@ if __name__ == "__main__":
         update_env()
         print("Updating configuration has completed!")
 
-    errors = check_env()
-    while errors:
-        print("Unfortunately there are some errors with your configuration."
-              " Make sure Milvus and lm-studio (if you are using it) is up : ")
-        print('\n\n'.join(errors))
-        update_env()
-        errors = check_env()
-
+    # errors = check_env()
+    # while errors:
+    #     print("Unfortunately there are some errors with your configuration."
+    #           " Make sure Milvus and lm-studio (if you are using it) is up : ")
+    #     print('\n\n'.join(errors))
+    #     update_env()
+    #     errors = check_env()
+    #
     print("All done!")
     main()
