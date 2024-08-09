@@ -10,7 +10,6 @@ class MilvusHandler:
         self.collection_name = collection_name
         self.dimensions = dimensions
 
-    def save_vectors(self, vectors, chunks):
         if self.milvus_client.has_collection(collection_name=self.collection_name):
             self.milvus_client.drop_collection(collection_name=self.collection_name)
         self.milvus_client.create_collection(
@@ -18,6 +17,7 @@ class MilvusHandler:
             dimension=self.dimensions,
         )
 
+    def save_vectors(self, vectors, chunks):
         data = [
             {"id": i, "vector": vectors[i], "text": chunks[i], "subject": "history"}
             for i in range(len(vectors))
