@@ -36,6 +36,13 @@ class MilvusHandler:
         return results
 
 
+    def delete_vectors(self, file_id):
+        self.milvus_client.delete(
+            collection_name=self.collection_name,
+            filter=f"file_group == {file_id}",
+            )
+
+
     @staticmethod
     def check_milvus_uri(milvus_uri: str) -> str:
         try:
