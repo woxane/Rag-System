@@ -31,14 +31,16 @@ class MilvusHandler:
         index_params.add_index("text")
         index_params.add_index("file_id")
 
+        try:
+            self.milvus_client.create_collection(
+                collection_name=self.collection_name,
+                schema=schema,
+                index_params=index_params,
+            )
 
-        if self.milvus_client.has_collection(collection_name=self.collection_name):
-            self.milvus_client.drop_collection(collection_name=self.collection_name)
-        self.milvus_client.create_collection(
-            collection_name=self.collection_name,
-            schema=schema,
-            index_params=index_params,
-        )
+        except:
+            if self.milvus_client.has_collection(collection_name=self.collection_name):
+                self.milvus_client.drop_collection(collection_name=self.collection_name)
 
     def save_vectors(self, vectors, chunks, file_id):
         data = [
