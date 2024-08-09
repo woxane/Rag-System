@@ -46,11 +46,11 @@ class ChatInterface:
 
         with st.sidebar:
             st.header("Upload PDF Files")
+            current_files = []
             uploaded_files = st.file_uploader("Choose PDF files", type="pdf", accept_multiple_files=True)
             uploaded_ids = [file.file_id for file in uploaded_files]
 
             if uploaded_files:
-                current_files = []
                 for id in st.session_state.files_id:
                     if id not in uploaded_ids:
                         #This file has deleted
@@ -64,6 +64,7 @@ class ChatInterface:
                         chunks = self.document_processor.load_pdf(file)
                         vectors = self.vectorizer.vectorize(chunks)
                         self.milvus_handler.save_vectors(vectors, chunks, file.file_id)
+                        st.session_state.files_id.append(file.file_id)
                         st.session_state.file_names.append(file.name)
 
                         st.success("PDF files uploaded successfully!")
