@@ -56,7 +56,7 @@ Helpful Answer:"""
                 | StrOutputParser()
         )
 
-    def get_response(self, query: str):
+    def get_response(self, query: str, similar_contexts: List[str]):
         """
         Get response from LLM model.
 
@@ -64,12 +64,13 @@ Helpful Answer:"""
 
         Parameters:
         query (str): user question without embeddings.
+        similar_contexts (List[str]): documents that are similar to the query that user entered.
 
         Returns:
         str: output of chain invoke
         """
 
-        return self._rag_chain.invoke(query)
+        return self._rag_chain.invoke({"context": similar_contexts, "question": query})
 
     @staticmethod
     def _format_doc(docs: List[Document]) -> str:
