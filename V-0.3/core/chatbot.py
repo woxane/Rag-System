@@ -56,7 +56,7 @@ Helpful Answer:"""
                 | StrOutputParser()
         )
 
-    def get_response(self, query: str, similar_contexts: List[str]):
+    def get_response(self, query: str, similar_contexts: List[str]) -> str:
         """
         Get response from LLM model.
 
@@ -72,8 +72,7 @@ Helpful Answer:"""
 
         return self._rag_chain.invoke({"context": similar_contexts, "question": query})
 
-
-    def _search_docs(self, query: str):
+    def _search_docs(self, query: str) -> List[str]:
         """
         search similar documents and get the contents.
 
@@ -90,7 +89,6 @@ Helpful Answer:"""
         similar_documents: List[Document] = self._retriever.invoke(query)
         contexts: List[str] = [document.page_content for document in similar_documents]
         return contexts
-
 
     @staticmethod
     def _format_doc(docs: List[Document]) -> str:
