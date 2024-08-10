@@ -11,6 +11,8 @@ class DocumentProcessor:
     ]
 
     def __init__(self, chunk_size: int = 256, chunk_overlap: int = 64):
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
         self.text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(
             separators=self._separators,
             chunk_size=chunk_size,
@@ -18,6 +20,10 @@ class DocumentProcessor:
             length_function=len,
             is_separator_regex=False,
         )
+
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(chunk_size={self.chunk_size!r}, chunk_overlap={self.chunk_overlap!r})"
 
     def load_pdf(self, file) -> List[Document]:
         pdf_document = fitz.open(stream=file.read(), filetype="pdf")
