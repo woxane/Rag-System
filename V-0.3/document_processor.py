@@ -35,7 +35,7 @@ class DocumentProcessor:
         file (file | streamlit file_uploader like objects): returning object of streamlit.file_uploader
 
         Returns:
-        List[str]: chunks that splitted using RecursiveCharacterTextSplitter
+        List[str]: chunks that separated using RecursiveCharacterTextSplitter
         """
         pdf_document = fitz.open(stream=file.read(), filetype="pdf")
         text = ""
