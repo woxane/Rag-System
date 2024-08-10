@@ -1,2 +1,5 @@
 ### Dot Env ###
 .env
+
+### Mivlus Database ###
+*.db
