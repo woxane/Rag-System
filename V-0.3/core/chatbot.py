@@ -2,6 +2,7 @@ from sys import path
 from dotenv import dotenv_values
 from collections import OrderedDict
 from typing import List
+from uuid import uuid4, UUID
 
 from langchain_milvus import Milvus
 from langchain_openai import OpenAI
@@ -71,6 +72,25 @@ Helpful Answer:"""
         """
 
         return self._rag_chain.invoke({"context": similar_contexts, "question": query})
+
+    def save_pdf(self, file) -> None:
+        """
+        Save embedded chunks into Milvus db.
+
+        This method get PDF file and split it using DocumentProcessor class and convert them into vectors
+        and save it into Milvus db.
+
+        Parameters:
+        file (file | streamlit file_uploader like objects): returning object of streamlit.file_uploader
+
+        Returns:
+            None
+        """
+
+        chunks: List[str] = self.__class__._documentProcessor.load_pdf(file=file)
+        documents: List[Document] = [Document(page_content=chunk, metadate={"file_id": file.file_id}) for chunk in chunks]
+        document_ids: List[UUID] = [uuid4() for _ in documents]
+        self.__class__._milvus.add_documents(documents=documents, ids=document_ids)
 
     def _search_docs(self, query: str) -> List[str]:
         """
