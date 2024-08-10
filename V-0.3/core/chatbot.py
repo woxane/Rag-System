@@ -72,6 +72,26 @@ Helpful Answer:"""
 
         return self._rag_chain.invoke({"context": similar_contexts, "question": query})
 
+
+    def _search_docs(self, query: str):
+        """
+        search similar documents and get the contents.
+
+        This method using the Milvus retriever find most similar contents using the user embedding model
+        from database and get their contents.
+
+        Parameters:
+        query (str): user question without embeddings.
+
+        Returns:
+        List[str]: list of contents that are most related to the user question.
+        """
+
+        similar_documents: List[Document] = self._retriever.invoke(query)
+        contexts: List[str] = [document.page_content for document in similar_documents]
+        return contexts
+
+
     @staticmethod
     def _format_doc(docs: List[Document]) -> str:
         """
