@@ -8,10 +8,13 @@ from langchain_openai import OpenAI
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import PromptTemplate
 from langchain_core.documents import Document
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
 
 path.append('../')
 
 from utils.document_processor import DocumentProcessor
+
 
 dotenv_path = '.env'
 
@@ -41,10 +44,36 @@ Helpful Answer:"""
         connection_args={"uri": _env_values["milvus_uri"]},
     )
 
-    def __init__(self, prompt_template=_prompt_template):
-        self._rag_template: PromptTemplate = PromptTemplate.from_template(prompt_template)
+    def __init__(self, prompt_template: str = _prompt_template, limit: int = 3):
+        self._rag_prompt: PromptTemplate = PromptTemplate.from_template(prompt_template)
+        self._retriever = self.__class__._milvus.as_retriever(search_type="similarity", search_kwargs={"k": limit})
 
-    def _format_doc(self, docs: List[Document]) -> str:
+        self._rag_chain = (
+                {"context": self._retriever | self._format_docs, "question": RunnablePassthrough()}
+                | self._rag_prompt
+                | self.__class__._llm
+                | StrOutputParser()
+        )
+
+
+    def get_response(self, query: str):
+        """
+        Get response from LLM model.
+
+        This method using the chain that we create it constructor calls the model and return the answer.
+
+        Parameters:
+        query (str): user question without embeddings.
+
+        Returns:
+        str: output of chain invoke
+        """
+
+        return self._rag_chain.invoke(query)
+
+
+    @staticmethod
+    def _format_doc(docs: List[Document]) -> str:
         """
         Joins page_content of each element using \n\n.
 
