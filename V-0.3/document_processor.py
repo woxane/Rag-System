@@ -25,7 +25,18 @@ class DocumentProcessor:
     def __repr__(self):
         return f"{self.__class__.__name__}(chunk_size={self.chunk_size!r}, chunk_overlap={self.chunk_overlap!r})"
 
-    def load_pdf(self, file) -> List[Document]:
+    def load_pdf(self, file) -> List[str]:
+        """
+        Extracts text from a PDF file and splits it into chunks
+
+        This method using split the text using langchain.text_splitter.RecursiveCharacterTextSplitter to split the text.
+
+        Parameters:
+        file (file | streamlit file_uploader like objects): returning object of streamlit.file_uploader
+
+        Returns:
+        List[str]: chunks that splitted using RecursiveCharacterTextSplitter
+        """
         pdf_document = fitz.open(stream=file.read(), filetype="pdf")
         text = ""
         for page_num in range(len(pdf_document)):
@@ -34,5 +45,4 @@ class DocumentProcessor:
         pdf_document.close()
 
         chunks = self.text_splitter.split_text(text)
-        documents = [Document(page_content=chunk, metadata={"file_id": file.file_id}) for chunk in chunks]
-        return documents
+        return chunks
