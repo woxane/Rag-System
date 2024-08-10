@@ -84,13 +84,29 @@ Helpful Answer:"""
         file (file | streamlit file_uploader like objects): returning object of streamlit.file_uploader
 
         Returns:
-            None
+        None
         """
 
         chunks: List[str] = self.__class__._documentProcessor.load_pdf(file=file)
         documents: List[Document] = [Document(page_content=chunk, metadate={"file_id": file.file_id}) for chunk in chunks]
         document_ids: List[UUID] = [uuid4() for _ in documents]
         self.__class__._milvus.add_documents(documents=documents, ids=document_ids)
+
+
+    def delete_pdf(self, file_id: str):
+        """
+        Delete vectors from a pdf file from Milvus db.
+
+        This method deletes every vector from chunks of a specific PDF from milvus using their file_id.
+
+        Parameters:
+        file_id (str): the file_id that streamlit provide to each uploaded file.
+
+        Returns:
+        None
+        """
+        documents_id: List[str] = self.__class__._milvus.get_pks(expr=f"file_id == '{file_id}'")
+        self.__class__._milvus.delete(ids=documents_id)
 
     def _search_docs(self, query: str) -> List[str]:
         """
