@@ -57,7 +57,7 @@ Helpful Answer:"""
                 | StrOutputParser()
         )
 
-    def get_response(self, query: str, similar_contexts: List[str]) -> str:
+    def get_response(self, query: str, similar_contexts: List[str], stream: bool = False) -> str:
         """
         Get response from LLM model.
 
@@ -66,10 +66,14 @@ Helpful Answer:"""
         Parameters:
         query (str): user question without embeddings.
         similar_contexts (List[str]): documents that are similar to the query that user entered.
+        stream (bool): if true return streamed version of answer
 
         Returns:
         str: output of chain invoke
         """
+
+        if stream:
+            return self._rag_chain.stream({"context": similar_contexts, "question": query})
 
         return self._rag_chain.invoke({"context": similar_contexts, "question": query})
 
