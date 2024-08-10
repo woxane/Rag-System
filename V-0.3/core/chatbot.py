@@ -15,7 +15,6 @@ path.append('../')
 
 from utils.document_processor import DocumentProcessor
 
-
 dotenv_path = '.env'
 
 
@@ -38,10 +37,12 @@ Helpful Answer:"""
     _embedding: HuggingFaceEmbeddings = HuggingFaceEmbeddings(model_name=_env_values['embedding_model_name'])
     _llm: OpenAI = OpenAI(base_url=_env_values["openAI_base_url"],
                           api_key=_env_values["openAI_api_key"],
-                          model_name=_env_values["LLM_model_name"])
+                          model=_env_values["LLM_model_name"])
     _milvus: Milvus = Milvus(
         embedding_function=_embedding,
         connection_args={"uri": _env_values["milvus_uri"]},
+        collection_name=_env_values["collection_name"],
+        drop_old=True,
     )
 
     def __init__(self, prompt_template: str = _prompt_template, limit: int = 3):
@@ -49,12 +50,11 @@ Helpful Answer:"""
         self._retriever = self.__class__._milvus.as_retriever(search_type="similarity", search_kwargs={"k": limit})
 
         self._rag_chain = (
-                {"context": self._retriever | self._format_docs, "question": RunnablePassthrough()}
+                {"context": self._retriever | self._format_doc, "question": RunnablePassthrough()}
                 | self._rag_prompt
                 | self.__class__._llm
                 | StrOutputParser()
         )
-
 
     def get_response(self, query: str):
         """
@@ -71,7 +71,6 @@ Helpful Answer:"""
 
         return self._rag_chain.invoke(query)
 
-
     @staticmethod
     def _format_doc(docs: List[Document]) -> str:
         """
@@ -85,5 +84,5 @@ Helpful Answer:"""
         Returns:
         str: output of joins on the page contents.
         """
-        
+
         return "\n\n".join(doc.page_content for doc in docs)
