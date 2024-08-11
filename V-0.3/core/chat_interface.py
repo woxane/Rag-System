@@ -66,7 +66,6 @@ class ChatInterface:
 
         # Accept user input
         if user_input := st.chat_input("Type your message here ..."):
-            st.session_state.messages.append({'role': 'user', 'content': user_input})
 
             with st.chat_message("user"):
                 st.markdown(user_input)
@@ -74,9 +73,9 @@ class ChatInterface:
             with st.chat_message("assistant"):
                 message_placeholder = st.empty()
                 full_response = ""
-                chat_history = '\n'.join(f"{message["role"]}:{message["content"]}" for
-                                         message in st.session_state.messages)
-                completion = self.chatbot.get_response(query=user_input, history=chat_history, stream=True)
+                chat_history = '\n'.join([f"{message['role']}:{message['content']}" for
+                                         message in st.session_state.messages])
+                completion = self.chatbot.get_response(query=user_input, history=chat_history, stream=False)
 
                 for response in completion:
                     full_response += response
@@ -84,6 +83,7 @@ class ChatInterface:
 
                 message_placeholder.markdown(full_response)
 
+            st.session_state.messages.append({'role': 'user', 'content': user_input})
             st.session_state.messages.append({'role': 'assistant', 'content': full_response})
 
 
