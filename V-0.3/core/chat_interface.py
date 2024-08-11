@@ -72,12 +72,11 @@ class ChatInterface:
                 st.markdown(user_input)
 
             with st.chat_message("assistant"):
-                # TODO: handle history
                 message_placeholder = st.empty()
                 full_response = ""
-                # messages = [{"role": message["role"], "content": message["content"]}
-                #             for message in st.session_state.messages]
-                completion = self.chatbot.get_response(user_input)
+                chat_history = '\n'.join(f"{message["role"]}:{message["content"]}" for
+                                         message in st.session_state.messages)
+                completion = self.chatbot.get_response(query=user_input, history=chat_history, stream=True)
 
                 for response in completion:
                     full_response += response
