@@ -7,9 +7,8 @@ from uuid import uuid4, UUID
 from langchain_milvus import Milvus
 from langchain_openai import OpenAI
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.documents import Document
-from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
 path.append('../')
@@ -21,7 +20,7 @@ dotenv_path = '.env'
 
 class Chatbot:
     _prompt_template: str = """You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful.
-The above is a conversation between you and a human, you must answer as a assistant with the above instructions'
+The above history is a conversation between you and a human,(if there isn't anything that means a new start) you must answer as a assistant with the above instructions.
 
 Instructions:
 - Provide an accurate and thoughtful answer based on the context if the question is related.
@@ -53,15 +52,14 @@ Answer:"""
     )
 
     def __init__(self, prompt_template: str = _prompt_template, limit: int = 3):
-        self._rag_prompt: PromptTemplate = PromptTemplate.from_template(prompt_template)
+        self._rag_prompt: ChatPromptTemplate = ChatPromptTemplate.from_template(prompt_template)
         self._retriever = self.__class__._milvus.as_retriever(search_type="similarity", search_kwargs={"k": limit})
 
-        self._rag_chain = (
-                {"context": self._retriever | self._format_doc, "question": RunnablePassthrough()}
-                | self._rag_prompt
-                | self.__class__._llm
-                | StrOutputParser()
-        )
+        self._rag_chain = self._rag_prompt | self.__class__._llm | StrOutputParser()
+                # {"context": self._retriever | self._format_doc,
+                #  "history": RunnablePassthrough(),
+                #  "question": RunnablePassthrough()}
+
 
     def get_response(self, query: str, history: str, stream: bool = False) -> str:
         """
@@ -103,7 +101,7 @@ Answer:"""
         chunks: List[str] = self.__class__._documentProcessor.load_pdf(file=file)
         documents: List[Document] = [Document(page_content=chunk, metadate={"file_id": file.file_id}) for chunk in
                                      chunks]
-        document_ids: List[UUID] = [uuid4() for _ in documents]
+        document_ids: List[str] = [str(uuid4()) for _ in documents]
         self.__class__._milvus.add_documents(documents=documents, ids=document_ids)
 
     def delete_pdf(self, file_id: str):
