@@ -7,7 +7,7 @@ from uuid import uuid4, UUID
 from langchain_milvus import Milvus
 from langchain_openai import OpenAI
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
 
@@ -48,7 +48,7 @@ class Chatbot:
     )
 
     def __init__(self, prompt_template: str = _prompt_template, limit: int = 3):
-        self._rag_prompt: ChatPromptTemplate = ChatPromptTemplate.from_template(prompt_template)
+        self._rag_prompt: PromptTemplate = PromptTemplate.from_template(prompt_template)
         self._retriever = self.__class__._milvus.as_retriever(search_type="similarity", search_kwargs={"k": limit})
 
         self._rag_chain = self._rag_prompt | self.__class__._llm | StrOutputParser()
