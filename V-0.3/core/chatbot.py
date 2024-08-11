@@ -20,16 +20,17 @@ dotenv_path = '.env'
 
 
 class Chatbot:
-    _prompt_template: str = """Use the following pieces of context to answer the question at the end.
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
-Use three sentences maximum and keep the answer as concise as possible.
-Always say "thanks for asking!" at the end of the answer.
-
-{context}
-
-Question: {question}
-
-Helpful Answer:"""
+    _prompt_template: str = """Question: {question}
+    
+    Contexts: {context}
+    
+    Instructions:
+    - Provide an accurate and thoughtful answer based on the context if the question is related.
+    - If the question is unrelated or general (like greetings), respond appropriately but without referencing the context.
+    - If you don't know the answer, simply say 'I don't know.'
+    - Provide only the answer; avoid unnecessary talk or explanations.
+    
+    Answer:"""
 
     _env_values: OrderedDict = dotenv_values(dotenv_path)
 
