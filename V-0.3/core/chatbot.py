@@ -33,7 +33,6 @@ Contexts: {context}
 
 history: {history}
 
-
 Question: {question}
     
 Answer:"""
@@ -64,7 +63,7 @@ Answer:"""
                 | StrOutputParser()
         )
 
-    def get_response(self, query: str, stream: bool = False) -> str:
+    def get_response(self, query: str, history: str, stream: bool = False) -> str:
         """
         Get response from LLM model.
 
@@ -72,6 +71,7 @@ Answer:"""
 
         Parameters:
         query (str): user question without embeddings.
+        history (str): that chat history between user and model.
         similar_contexts (List[str]): documents that are similar to the query that user entered.
         stream (bool): if true return streamed version of answer
 
@@ -82,9 +82,9 @@ Answer:"""
         similar_contexts: List[str] = self._search_docs(query=query)
 
         if stream:
-            return self._rag_chain.stream({"context": similar_contexts, "question": query})
+            return self._rag_chain.stream({"context": similar_contexts, "history": history, "question": query})
 
-        return self._rag_chain.invoke({"context": similar_contexts, "question": query})
+        return self._rag_chain.invoke({"context": similar_contexts, "history": history, "question": query})
 
     def save_pdf(self, file) -> None:
         """
@@ -101,10 +101,10 @@ Answer:"""
         """
 
         chunks: List[str] = self.__class__._documentProcessor.load_pdf(file=file)
-        documents: List[Document] = [Document(page_content=chunk, metadate={"file_id": file.file_id}) for chunk in chunks]
+        documents: List[Document] = [Document(page_content=chunk, metadate={"file_id": file.file_id}) for chunk in
+                                     chunks]
         document_ids: List[UUID] = [uuid4() for _ in documents]
         self.__class__._milvus.add_documents(documents=documents, ids=document_ids)
-
 
     def delete_pdf(self, file_id: str):
         """
