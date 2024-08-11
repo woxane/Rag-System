@@ -20,17 +20,23 @@ dotenv_path = '.env'
 
 
 class Chatbot:
-    _prompt_template: str = """Question: {question}
+    _prompt_template: str = """You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful.
+The above is a conversation between you and a human, you must answer as a assistant with the above instructions'
+
+Instructions:
+- Provide an accurate and thoughtful answer based on the context if the question is related.
+- If the question is unrelated or general (like greetings), respond appropriately but without referencing the context.
+- If you don't know the answer, simply say 'I don't know.'
+- Provide only the answer; avoid unnecessary talk or explanations.
+
+Contexts: {context}
+
+history: {history}
+
+
+Question: {question}
     
-    Contexts: {context}
-    
-    Instructions:
-    - Provide an accurate and thoughtful answer based on the context if the question is related.
-    - If the question is unrelated or general (like greetings), respond appropriately but without referencing the context.
-    - If you don't know the answer, simply say 'I don't know.'
-    - Provide only the answer; avoid unnecessary talk or explanations.
-    
-    Answer:"""
+Answer:"""
 
     _env_values: OrderedDict = dotenv_values(dotenv_path)
 
