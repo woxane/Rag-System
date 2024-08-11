@@ -20,13 +20,15 @@ dotenv_path = '.env'
 
 class Chatbot:
     _prompt_template: str = """You are an intelligent assistant. You always provide well-reasoned answers that are both correct and helpful.
-The above history is a conversation between you and a human,(if there isn't anything that means a new start) you must answer as a assistant with the above instructions.
+The above history is a conversation between you and a human (if there isn't anything that means a new start).
+you just need to answer as a assistant with the above rules.
 
-Instructions:
+Rules:
+- Provide only the answer; avoid unnecessary talk or explanations.
+- Summarize the answer; do not talk about anything but the answer.
 - Provide an accurate and thoughtful answer based on the context if the question is related.
 - If the question is unrelated or general (like greetings), respond appropriately but without referencing the context.
 - If you don't know the answer, simply say 'I don't know.'
-- Provide only the answer; avoid unnecessary talk or explanations.
 
 Contexts: {context}
 
@@ -78,6 +80,7 @@ Answer:"""
         """
 
         similar_contexts: List[str] = self._search_docs(query=query)
+        print("history: ", history)
 
         if stream:
             return self._rag_chain.stream({"context": similar_contexts, "history": history, "question": query})
