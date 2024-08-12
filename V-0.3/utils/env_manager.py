@@ -1,9 +1,22 @@
 from dotenv import set_key, dotenv_values
 from collections import OrderedDict
+from typing import Dict, Tuple
 
 
 class EnvManager:
     def __init__(self, dotenv_path: str = ".env"):
+        # DRY: set environment items with why we need that and recommended value
+        self._environment_items: Dict[Tuple[str, str], str] = {
+            ("chunk_size", "chunk size for text splitting"): "256",
+            ("chunk_overlap", "chunk overlap for text splitting"): "64",
+            ("embedding_model_name", "name of the embedding model(needs to exist in hugginface)"): "sentence-transformers/all-MiniLM-L6-v2",
+            ("collection_name", "collection name for Milvus db"): "Test",
+            ("milvus_uri", "your milvus uri"): "http://localhost:19530",
+            ("openAI_base_url", "your open ai base url for connection"): "http://localhost:1234/v1",
+            ("openAI_api_key", "your open ai api key"): "lm-studio",
+            ("LLM_model_name", "LLM model name"): "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
+        }
+        
         self.path = dotenv_path
 
     def setup_env(self):
