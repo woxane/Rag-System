@@ -21,6 +21,11 @@ class DocumentProcessor:
             is_separator_regex=False,
         )
 
+    def __repr__(self):
+        return (f"{self.__class__.__name__}("
+                f"chunk_size={self.chunk_size}, "
+                f"chunk_overlap={self.chunk_overlap}")
+
 
     def __repr__(self):
         return f"{self.__class__.__name__}(chunk_size={self.chunk_size!r}, chunk_overlap={self.chunk_overlap!r})"
