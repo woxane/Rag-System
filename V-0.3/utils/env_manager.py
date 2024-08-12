@@ -38,7 +38,19 @@ class EnvManager:
             else "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF"
         set_key(self.path, 'LLM_model_name', LLM_model_name)
 
-    def update_env(self):
+    def update_env(self) -> None:
+        """
+        Update environment variables.
+
+        This method iterate on variables that is in the dotenv that specified and if there is anything that user
+        wants to change it, it will update it.
+
+        Parameter:
+        None
+
+        Returns:
+        None
+        """
         env_values: OrderedDict = dotenv_values(self.path)
 
         for key in env_values:
