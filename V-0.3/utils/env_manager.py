@@ -19,37 +19,21 @@ class EnvManager:
         
         self.path = dotenv_path
 
-    def setup_env(self):
-        # DocumentProcessor params part
-        chunk_size = size if (size := input("Enter chunk size for text split function (Enter for 256) : ")) else "256"
-        set_key(self.path, 'chunk_size', chunk_size)
-        chunk_overlap = overlap if (
-            overlap := input("Enter chunk overlap for text split function (Enter for 64) : ")) else "64"
-        set_key(self.path, 'chunk_overlap', chunk_overlap)
+    def setup_env(self) -> None:
+        """
+        First time setup environment variable.
 
-        # Vectorizer param part
-        embedding_model_name = model if (model := input("Enter model name for word embedding"
-                                                        " (Enter for sentence-transformers/all-MiniLM-L6-v2) : ")) \
-            else "sentence-transformers/all-MiniLM-L6-v2"
-        set_key(self.path, 'embedding_model_name', embedding_model_name)
+        This method set value for settings from user with iterating in _environment_items.
 
-        # MilvusHandler params part
-        collection_name = name if (name := input("Enter collection name for Milvus db (Enter for Test) : ")) else "Test"
-        set_key(self.path, 'collection_name', collection_name)
-        milvus_uri = uri if (uri := input("Enter your milvus uri (Enter for http://localhost:19530) : ")) \
-            else "http://localhost:19530"
-        set_key(self.path, 'milvus_uri', milvus_uri)
+        Parameter:
+        None
 
-        # Chatbot params part
-        openAI_base_url = url if (url := input("Enter open ai url to connect (Enter for http://localhost:1234/v1) : ")) \
-            else "http://localhost:1234/v1"
-        set_key(self.path, 'openAI_base_url', openAI_base_url)
-        openAI_api_key = key if (key := input("Enter your open ai api key (Enter for lm-studio) : ")) else "lm-studio"
-        set_key(self.path, 'openAI_api_key', openAI_api_key)
-        LLM_model_name = name if (name := input("Enter LLM model name "
-                                                "(Enter for lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF) : ")) \
-            else "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF"
-        set_key(self.path, 'LLM_model_name', LLM_model_name)
+        Returns:
+        None
+        """
+        for (key, prompt_text), recommended_value in self._environment_items:
+            value: str = temp if (temp := input(f"Enter {prompt_text} (Enter for {recommended_value}): ")) else recommended_value
+            set_key(dotenv_path=self.path, key_to_set=key, value_to_set=value)
 
     def update_env(self) -> None:
         """
