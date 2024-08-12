@@ -19,18 +19,18 @@ dotenv_path = '.env'
 
 
 class Chatbot:
-    _prompt_template: str = "system:You are an intelligent assistant. You always provide well-reasoned answers"\
-    "that are both correct and helpful. The above history is a conversation between you and a human"\
-    "(if there isn't anything that means a new start). you just need to answer as a assistant with the above instructions."\
-    "\n### Instructions:"\
-    "- Provide only the answer; avoid unnecessary talk or explanations."\
-    "- Provide an accurate and thoughtful answer based on the context if the question is related."\
-    "- If the question is unrelated or general (like greetings), respond appropriately but without referencing the context."\
-    "- If you don't know the answer, simply say I don't know."\
-    "\n### Contexts: {context}"\
-    "\n### History: {history}"\
-    "\n### Question: {question}"\
-    "\n### Answer:"\
+    _prompt_template: str = "system:You are an intelligent assistant. You always provide well-reasoned answers" \
+                            "that are both correct and helpful. The above history is a conversation between you and a human" \
+                            "(if there isn't anything that means a new start). you just need to answer as a assistant with the above instructions." \
+                            "\n### Instructions:" \
+                            "- Provide only the answer; avoid unnecessary talk or explanations." \
+                            "- Provide an accurate and thoughtful answer based on the context if the question is related." \
+                            "- If the question is unrelated or general (like greetings), respond appropriately but without referencing the context." \
+                            "- If you don't know the answer, simply say I don't know." \
+                            "\n### Contexts: {context}" \
+                            "\n### History: {history}" \
+                            "\n### Question: {question}" \
+                            "\n### Answer:"\
 
     _env_values: OrderedDict = dotenv_values(dotenv_path)
 
@@ -48,14 +48,20 @@ class Chatbot:
     )
 
     def __init__(self, prompt_template: str = _prompt_template, limit: int = 3):
+        self.prompt_template = prompt_template
+        self.limit = limit
         self._rag_prompt: PromptTemplate = PromptTemplate.from_template(prompt_template)
         self._retriever = self.__class__._milvus.as_retriever(search_type="similarity", search_kwargs={"k": limit})
 
         self._rag_chain = self._rag_prompt | self.__class__._llm | StrOutputParser()
-                # {"context": self._retriever | self._format_doc,
-                #  "history": RunnablePassthrough(),
-                #  "question": RunnablePassthrough()}
+        # {"context": self._retriever | self._format_doc,
+        #  "history": RunnablePassthrough(),
+        #  "question": RunnablePassthrough()}
 
+    def __repr__(self):
+        return (f"{self.__class__.__name__}("
+                f"prompt_template={self.prompt_template}, "
+                f"limit={self.limit})")
 
     def get_response(self, query: str, history: str, stream: bool = False) -> str:
         """
