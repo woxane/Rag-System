@@ -1,4 +1,5 @@
-from dotenv import set_key
+from dotenv import set_key, dotenv_values
+from collections import OrderedDict
 
 
 class EnvManager:
@@ -36,3 +37,13 @@ class EnvManager:
                                                 "(Enter for lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF) : ")) \
             else "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF"
         set_key(self.path, 'LLM_model_name', LLM_model_name)
+
+    def update_env(self):
+        env_values: OrderedDict = dotenv_values(self.path)
+
+        for key in env_values:
+            is_edit: bool = True if input(f"Value for {key} is {env_values[key]} Want to edit it ? (y/N)") else False
+
+            if is_edit:
+                updated_value: str = input(f"Enter updated value for {env_values[key]} : ")
+                set_key(self.path, key, updated_value)
