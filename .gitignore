@@ -3,3 +3,6 @@
 
 ### Mivlus Database ###
 *.db
+
+### Venv files ###
+rag/*
