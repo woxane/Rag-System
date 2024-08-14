@@ -40,6 +40,9 @@ class Chatbot:
     _embedding: OpenAIEmbeddings = OpenAIEmbeddings(model="nomic-ai/nomic-embed-text-v1.5-GGUF",
                                                     base_url=_env_values["openAI_base_url"],
                                                     api_key=_env_values["openAI_api_key"])
+    # Do not check the token length of inputs and automatically split inputs
+    # longer than embedding_ctx_length. (Won't work with nomic-embed-text)
+    _embedding.check_embedding_ctx_length = False
     _llm: OpenAI = OpenAI(base_url=_env_values["openAI_base_url"],
                           api_key=_env_values["openAI_api_key"],
                           model=_env_values["LLM_model_name"])
