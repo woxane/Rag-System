@@ -5,8 +5,7 @@ from typing import List
 from uuid import uuid4, UUID
 
 from langchain_milvus import Milvus
-from langchain_openai import OpenAI
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import OpenAI, OpenAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
@@ -36,7 +35,11 @@ class Chatbot:
 
     _documentProcessor: DocumentProcessor = DocumentProcessor(chunk_size=int(_env_values["chunk_size"]),
                                                               chunk_overlap=int(_env_values["chunk_overlap"]))
-    _embedding: HuggingFaceEmbeddings = HuggingFaceEmbeddings(model_name=_env_values['embedding_model_name'])
+
+    # Use nomic-embed-text to utilize all models we use from lm-studio
+    _embedding: OpenAIEmbeddings = OpenAIEmbeddings(model="nomic-ai/nomic-embed-text-v1.5-GGUF",
+                                                    base_url=_env_values["openAI_base_url"],
+                                                    api_key=_env_values["openAI_api_key"])
     _llm: OpenAI = OpenAI(base_url=_env_values["openAI_base_url"],
                           api_key=_env_values["openAI_api_key"],
                           model=_env_values["LLM_model_name"])
