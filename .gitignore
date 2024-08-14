@@ -6,3 +6,6 @@
 
 ### Venv files ###
 rag/*
+
+__pycache__/
+.idea/*
