@@ -9,3 +9,6 @@ rag/*
 
 __pycache__/
 .idea/*
+
+### jupyter checkpoints ###
+.ipynb_checkpoints/
