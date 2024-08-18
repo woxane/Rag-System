@@ -1,7 +1,7 @@
 from sys import path
 from dotenv import dotenv_values
 from collections import OrderedDict
-from typing import List
+from typing import List, Iterator
 from uuid import uuid4, UUID
 
 from langchain_milvus import Milvus
@@ -9,6 +9,7 @@ from langchain_openai import OpenAI, OpenAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 
 path.append('../')
 
@@ -29,7 +30,7 @@ class Chatbot:
                             "\n### Contexts: {context}" \
                             "\n### History: {history}" \
                             "\n### Question: {question}" \
-                            "\n### Answer:"\
+                            "\n### Answer:" \
 
     _env_values: OrderedDict = dotenv_values(dotenv_path)
 
@@ -54,22 +55,21 @@ class Chatbot:
     )
 
     def __init__(self, prompt_template: str = _prompt_template, limit: int = 3):
+        self._history = None
         self.prompt_template = prompt_template
         self.limit = limit
         self._rag_prompt: PromptTemplate = PromptTemplate.from_template(prompt_template)
         self._retriever = self.__class__._milvus.as_retriever(search_type="similarity", search_kwargs={"k": limit})
 
-        self._rag_chain = self._rag_prompt | self.__class__._llm | StrOutputParser()
-        # {"context": self._retriever | self._format_doc,
-        #  "history": RunnablePassthrough(),
-        #  "question": RunnablePassthrough()}
+        self._rag_chain = {"context": self._retriever | self._format_doc, "history": RunnableLambda(self.get_history),
+                           "question": RunnablePassthrough()} | self._rag_prompt | self.__class__._llm | StrOutputParser()
 
     def __repr__(self):
         return (f"{self.__class__.__name__}("
                 f"prompt_template={self.prompt_template}, "
                 f"limit={self.limit})")
 
-    def get_response(self, query: str, history: str, stream: bool = False) -> str:
+    def get_response(self, query: str, history: str, stream: bool = False) -> Iterator[str] | str:
         """
         Get response from LLM model.
 
@@ -78,20 +78,18 @@ class Chatbot:
         Parameters:
         query (str): user question without embeddings.
         history (str): that chat history between user and model.
-        similar_contexts (List[str]): documents that are similar to the query that user entered.
         stream (bool): if true return streamed version of answer
 
         Returns:
         str: output of chain invoke
         """
 
-        similar_contexts: List[str] = self._search_docs(query=query)
-        print("history: ", history)
+        self._history = history
 
         if stream:
-            return self._rag_chain.stream({"context": similar_contexts, "history": history, "question": query})
+            return self._rag_chain.stream(query)
 
-        return self._rag_chain.invoke({"context": similar_contexts, "history": history, "question": query})
+        return self._rag_chain.invoke(query)
 
     def save_pdf(self, file) -> None:
         """
@@ -161,3 +159,6 @@ class Chatbot:
         """
 
         return "\n\n".join(doc.page_content for doc in docs)
+
+    def get_history(self, _):
+        return self._history
