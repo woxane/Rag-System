@@ -1,7 +1,7 @@
 from sys import path
 from dotenv import dotenv_values
 from collections import OrderedDict
-from typing import List, Iterator
+from typing import List, Iterator, Dict
 from uuid import uuid4, UUID
 
 from langchain_milvus import Milvus
@@ -14,11 +14,15 @@ from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 path.append('../')
 
 from utils.document_processor import DocumentProcessor
+from utils.tokenizer import encode_history
 
 dotenv_path = '.env'
 
 
 class Chatbot:
+    _user_header_tag: str = "<|eot_id|><|start_header_id|>user<|end_header_id|>"
+    _assistant_header_tag: str = "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
+
     _prompt_template: str = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n" \
                             "You are an intelligent assistant." \
                             "You always provide well-reasoned answers that are both correct and helpful.\n" \
@@ -31,7 +35,6 @@ class Chatbot:
                             "- If you don't know the answer, simply say I don't know.\n" \
                             "Contexts:\n" \
                             "{context}\n" \
-                            "History:\n" \
                             "{history}\n" \
                             "<|eot_id|><|start_header_id|>user<|end_header_id|>\n" \
                             "{question}\n" \
@@ -74,7 +77,7 @@ class Chatbot:
                 f"prompt_template={self.prompt_template}, "
                 f"limit={self.limit})")
 
-    def get_response(self, query: str, history: str, stream: bool = False) -> Iterator[str] | str:
+    def get_response(self, query: str, history: List[Dict[str, str]], stream: bool = False) -> Iterator[str] | str:
         """
         Get response from LLM model.
 
@@ -89,7 +92,11 @@ class Chatbot:
         str: output of chain invoke
         """
 
-        self._history = history
+        self._history = encode_history(
+            user_header_tag=self.__class__._user_header_tag,
+            assistant_header_tag=self.__class__._assistant_header_tag,
+            histories=history,
+        )
 
         if stream:
             return self._rag_chain.stream(query)
