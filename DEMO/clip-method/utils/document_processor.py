@@ -5,30 +5,20 @@ from typing import List
 
 
 class DocumentProcessor:
-    _separators: List[str] = [
-        "\n\n", "\n", " ", ".", ",", "\u200b", "\uff0c", "\u3001",
-        "\uff0e", "\u3002", ""
-    ]
+    _separators: List[str] = [".", ","]
 
-    def __init__(self, chunk_size: int = 256, chunk_overlap: int = 64):
+    def __init__(self, chunk_size: int = 400):
         self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
         self.text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(
             separators=self._separators,
             chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap,
             length_function=len,
             is_separator_regex=False,
         )
 
-    def __repr__(self):
-        return (f"{self.__class__.__name__}("
-                f"chunk_size={self.chunk_size}, "
-                f"chunk_overlap={self.chunk_overlap}")
-
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(chunk_size={self.chunk_size!r}, chunk_overlap={self.chunk_overlap!r})"
+        return f"{self.__class__.__name__}(chunk_size={self.chunk_size!r})"
 
     def load_pdf(self, file) -> List[str]:
         """
@@ -49,5 +39,6 @@ class DocumentProcessor:
             text += page.get_text()
         pdf_document.close()
 
+        text = text.replace("\n", "")
         chunks = self.text_splitter.split_text(text)
         return chunks
