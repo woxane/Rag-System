@@ -26,9 +26,12 @@ def encode_history(user_header_tag: str, assistant_header_tag: str, histories: L
     history_structure: str = ""
 
     for history in histories:
-        history_structure += user_header_tag + "\n"
-        history_structure += history["user"] + "\n"
-        history_structure += assistant_header_tag + "\n"
-        history_structure += history["assistant"] + "\n"
+        if history['role'] == 'user':
+            history_structure += user_header_tag + "\n"
+
+        else:
+            history_structure += assistant_header_tag + "\n"
+
+        history_structure += history["content"] + "\n"
 
     return history_structure
