@@ -39,6 +39,6 @@ class DocumentProcessor:
             text += page.get_text()
         pdf_document.close()
 
-        text = text.replace("\n", "")
+        text = text.replace("\n", " ")
         chunks = self.text_splitter.split_text(text)
         return chunks
