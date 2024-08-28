@@ -1,5 +1,6 @@
 import streamlit as st
 from chatbot import Chatbot
+import re
 
 dotenv_path = ".env"
 
@@ -75,11 +76,31 @@ class ChatInterface:
                 full_response = ""
                 completion = self.chatbot.get_response(query=user_input, history=st.session_state.messages, stream=False)
 
+
+                reference_mode = True
                 for response in completion:
                     full_response += response
-                    message_placeholder.markdown(full_response + "▌")
+
+                    if "::" in full_response:
+                        reference_mode = False
+
+                    if not reference_mode:
+                        showing_response = full_response.split("::")[1]
+                        message_placeholder.markdown(showing_response + "▌")
 
                 message_placeholder.markdown(full_response)
+                try:
+                    references = [reference[1:-1] for reference in full_response.split('::')[0].split()]
+                    print(references)
+                    pattern = r'<({})>(.*?)</\1>'.format("|".join(map(str, references)))
+                    matches = re.findall(pattern, self.chatbot.get_latest_context(), re.DOTALL)
+                    extracted_texts = [match[1].strip() + "\n\n\n" for match in matches]
+
+                    message_placeholder.markdown(showing_response + "\n\n\n\n**Refrences:**\n\n\n" + "\n".join(extracted_texts))
+
+
+                except:
+                    print("OK")
 
             st.session_state.messages.append({'role': 'user', 'content': user_input})
             st.session_state.messages.append({'role': 'assistant', 'content': full_response})
