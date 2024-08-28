@@ -26,9 +26,11 @@ class Chatbot:
     _prompt_template: str = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n" \
                             "You are an intelligent assistant." \
                             "You always provide well-reasoned answers that are both correct and helpful.\n" \
-                            "The above history is a conversation between you and a human(if there isn't anything that means a new start).\n" \
-                            "you just need to answer as a assistant with the above instructions.\n" \
+                            "The above history is a conversation between you and a human(if there isn't anything that means a new start ).\n" \
+                            "each provided context have id at the start.\n" \
                             "Instructions:\n" \
+                            "- **Provide** the IDs of the contexts you use to answer the user in this format: `<id1>, <id2>, ...`. if no context used put <0> in it. \n" \
+                            "- The response should strictly follow this structure: `<id>` \n `answer`." \
                             "- Provide only the answer; avoid unnecessary talk or explanations.\n" \
                             "- Provide an accurate and thoughtful answer based on the context if the question is related.\n" \
                             "- If the question is unrelated or general (like greetings), respond appropriately but without referencing the context.\n" \
