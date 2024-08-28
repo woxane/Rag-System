@@ -161,17 +161,6 @@ class Chatbot:
         contexts: List[str] = [document.page_content for document in similar_documents]
         return contexts
 
-    def get_references(self, chunk_number):
-        if chunk_number <= 1:
-            chunks_pks = self.__class__._milvus.get_pks(expr=f"chunk_number == {chunk_number + 1}")
-
-        else:
-            chunks_pks = self.__class__._milvus.get_pks(expr=f"chunk_number in ({chunk_number - 1}, {chunk_number + 1})")
-
-        print("chunk pks \n", chunks_pks)
-        print('by id\n', self._milvus.get_by_ids(chunks_pks))
-
-
     def _format_doc(self, docs: List[Document]) -> str:
         """
         Joins page_content of each element using \n\n.
