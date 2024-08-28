@@ -27,14 +27,15 @@ class Chatbot:
                             "You are an intelligent assistant." \
                             "You always provide well-reasoned answers that are both correct and helpful.\n" \
                             "The above history is a conversation between you and a human(if there isn't anything that means a new start ).\n" \
-                            "each provided context have id at the start.\n" \
+                            "Each provided context have an their own ID at the start like this: <ID>context</ID>\n" \
                             "Instructions:\n" \
-                            "- **Provide** the IDs of the contexts you use to answer the user in this format: `<id1>, <id2>, ...`. if no context used put <0> in it. \n" \
-                            "- The response should strictly follow this structure: `<id>` \n `answer`." \
+                            "- **List** the tagged IDs of the contexts you use to answer the user at the start of your response with this format: `<id> <id> ...`. If no context is used, put `<0>::`. \n" \
+                            "- **Do not** include any text before the context IDs. \n" \
+                            "- **Separate** the context IDs from your answer using `::`.\n" \
                             "- Provide only the answer; avoid unnecessary talk or explanations.\n" \
                             "- Provide an accurate and thoughtful answer based on the context if the question is related.\n" \
                             "- If the question is unrelated or general (like greetings), respond appropriately but without referencing the context.\n" \
-                            "- If you don't know the answer, simply say I don't know.\n" \
+                            "- If you don't know the answer, simply say, I don't know.\n" \
                             "Contexts:\n" \
                             "{context}\n" \
                             "{history}\n" \
@@ -44,8 +45,7 @@ class Chatbot:
 
     _env_values: OrderedDict = dotenv_values(dotenv_path)
 
-    _documentProcessor: DocumentProcessor = DocumentProcessor(chunk_size=int(_env_values["chunk_size"]),
-                                                              chunk_overlap=int(_env_values["chunk_overlap"]))
+    _documentProcessor: DocumentProcessor = DocumentProcessor(chunk_size=int(_env_values["chunk_size"]))
 
     # Use nomic-embed-text to utilize all models we use from lm-studio
     _embedding: OpenAIEmbeddings = OpenAIEmbeddings(model="nomic-ai/nomic-embed-text-v1.5-GGUF",
@@ -66,6 +66,7 @@ class Chatbot:
 
     def __init__(self, prompt_template: str = _prompt_template, limit: int = 3):
         self._history = None
+        self._latest_contexts = None
         self.prompt_template = prompt_template
         self.limit = limit
         self._rag_prompt: PromptTemplate = PromptTemplate.from_template(prompt_template)
@@ -122,7 +123,7 @@ class Chatbot:
         chunks: List[str] = self.__class__._documentProcessor.load_pdf(file=file)
         documents: List[Document] = [Document(
             page_content=chunks[chunk_number],
-            metadata={"file_id": file.file_id, "chunk_number": chunk_number}
+            metadata={"file_id": file.file_id, "chunk_number": chunk_number + 1}
         ) for chunk_number in range(len(chunks))]
         document_ids: List[str] = [str(uuid4()) for _ in documents]
         self.__class__._milvus.add_documents(documents=documents, ids=document_ids)
@@ -160,12 +161,22 @@ class Chatbot:
         contexts: List[str] = [document.page_content for document in similar_documents]
         return contexts
 
-    @staticmethod
-    def _format_doc(docs: List[Document]) -> str:
+    def get_references(self, chunk_number):
+        if chunk_number <= 1:
+            chunks_pks = self.__class__._milvus.get_pks(expr=f"chunk_number == {chunk_number + 1}")
+
+        else:
+            chunks_pks = self.__class__._milvus.get_pks(expr=f"chunk_number in ({chunk_number - 1}, {chunk_number + 1})")
+
+        print("chunk pks \n", chunks_pks)
+        print('by id\n', self._milvus.get_by_ids(chunks_pks))
+
+
+    def _format_doc(self, docs: List[Document]) -> str:
         """
         Joins page_content of each element using \n\n.
 
-        This method get searched documents and convert them to a literal string using \n\n join.
+        This method get searched documents and a tag with a specifc ID as a chunk number to each one of them.
 
         Parameters:
         docs (List[Documents]): List of searched documents.
@@ -173,8 +184,14 @@ class Chatbot:
         Returns:
         str: output of joins on the page contents.
         """
+        formated_context= "\n".join("<" + str(doc.metadata['chunk_number']) + ">" + doc.page_content +
+                            "</" + str(doc.metadata['chunk_number']) + ">" for doc in docs)
 
-        return "\n\n".join(doc.page_content for doc in docs)
+        self._latest_context = formated_context 
+        return formated_context 
 
     def get_history(self, _):
         return self._history
+    
+    def get_latest_context(self):
+        return self._latest_context
