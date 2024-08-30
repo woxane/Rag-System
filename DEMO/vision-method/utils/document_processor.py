@@ -4,6 +4,8 @@ from langchain_core.documents import Document
 from typing import List, Dict, Any
 from PIL import Image
 import io
+import base64
+
 
 
 class DocumentProcessor:
@@ -49,9 +51,8 @@ class DocumentProcessor:
                 xref = image[0]
                 image_data = pdf_document.extract_image(xref)
                 image_bytes = image_data["image"]
-
-                pil_image = Image.open(io.BytesIO(image_bytes))
-                pdf['images'].append(pil_image)
+                image_b64 = base64.b64encode(image_bytes).decode('utf-8')
+                pdf['images'].append(image_b64)
 
         pdf_document.close()
 
