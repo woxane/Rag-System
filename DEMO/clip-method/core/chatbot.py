@@ -123,7 +123,7 @@ class Chatbot:
         chunks: List[str] = self.__class__._documentProcessor.load_pdf(file=file)["chunks"]
         documents: List[Document] = [Document(
             page_content=chunks[chunk_number],
-            metadata={"file_id": file.file_id, "chunk_number": chunk_number + 1}
+            metadata={"file_id": file.file_id,"file_name": file.file_name "chunk_number": chunk_number + 1}
         ) for chunk_number in range(len(chunks))]
         document_ids: List[str] = [str(uuid4()) for _ in documents]
         self.__class__._milvus.add_documents(documents=documents, ids=document_ids)
