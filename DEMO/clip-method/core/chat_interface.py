@@ -147,7 +147,7 @@ class ChatInterface:
                                     '<div class="hover-container">\n' \
                                     "   <b>Refrences</b>\n" \
                                     '   <div class="hover-content">\n' \
-                                    f"       {references}" \
+                                    f"        <p>{references}</p>" \
                                     "   </div>\n" \
                                     "</div>\n"
                     
