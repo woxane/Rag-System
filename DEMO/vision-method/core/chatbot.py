@@ -125,12 +125,30 @@ class Chatbot:
         Returns:
         None
         """
+        docs = []
 
-        chunks: List[str] = self.__class__._documentProcessor.load_pdf(file=file)["chunks"]
-        documents: List[Document] = [Document(
-            page_content=chunks[chunk_number],
-            metadata={"file_id": file.file_id, "file_name": file.name, "chunk_number": chunk_number + 1}
-        ) for chunk_number in range(len(chunks))]
+        pdf_data = self.__class__._documentProcessor.load_pdf(file=file)
+        chunks = pdf_data['chunks']
+        images = pdf_data['images']
+        images_analyzation = [self.analyze_image(image) for image in images]
+
+        docs.append(("text", chunks))
+        docs.append(("image", images_analyzation))
+         
+        documents = [
+            Document(
+                page_content=data,
+                metadata={
+                    "file_id": file.file_id,
+                    "file_name": file.name,
+                    "chunk_number": idx + 1,
+                    "data_type": data_type
+                }
+            )
+            for data_type, datas in docs
+            for idx, data in enumerate(datas)
+        ]
+
         document_ids: List[str] = [str(uuid4()) for _ in documents]
         self.__class__._milvus.add_documents(documents=documents, ids=document_ids)
 
