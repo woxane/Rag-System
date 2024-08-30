@@ -55,7 +55,9 @@ class DocumentProcessor:
                 image = Image.open(io.BytesIO(image_bytes))
                 image_format = image.format
 
-                pdf['images'].append((image_b64, image_format))
+                image.save(f"{file.file_id}.{image_format.lower()}")
+
+                pdf['images'].append(image_b64)
 
         pdf_document.close()
 
