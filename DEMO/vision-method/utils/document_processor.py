@@ -47,7 +47,9 @@ class DocumentProcessor:
 
             images = page.get_images(full=True)
 
-            for image in images:
+            for image_index in range(len(images)):
+                image = images[image_index]
+
                 xref = image[0]
                 image_data = pdf_document.extract_image(xref)
                 image_bytes = image_data["image"]
@@ -55,7 +57,7 @@ class DocumentProcessor:
                 image = Image.open(io.BytesIO(image_bytes))
                 image_format = image.format
 
-                image.save(f"{file.file_id}.{image_format.lower()}")
+                image.save(f"{file.file_id}_{page_num}_{image_index}.{image_format.lower()}")
 
                 pdf['images'].append(image_b64)
 
