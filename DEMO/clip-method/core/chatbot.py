@@ -1,7 +1,7 @@
 from sys import path
 from dotenv import dotenv_values
 from collections import OrderedDict
-from typing import List, Iterator, Dict
+from typing import List, Iterator, Dict, Tuple
 from uuid import uuid4, UUID
 from pymilvus import MilvusClient
 
@@ -128,8 +128,7 @@ class Chatbot:
         chunks: List[str] = self.__class__._documentProcessor.load_pdf(file=file)["chunks"]
         documents: List[Document] = [Document(
             page_content=chunks[chunk_number],
-            # metadata={"file_id": file.file_id, "file_name": file.file_name, "chunk_number": chunk_number + 1}
-            metadata={"file_id": "asd", "file_name": "fuck", "chunk_number": chunk_number + 1}
+            metadata={"file_id": file.file_id, "file_name": file.name, "chunk_number": chunk_number + 1}
         ) for chunk_number in range(len(chunks))]
         document_ids: List[str] = [str(uuid4()) for _ in documents]
         self.__class__._milvus.add_documents(documents=documents, ids=document_ids)
@@ -214,11 +213,15 @@ class Chatbot:
         Returns:
         str: output of joins on the page contents.
         """
-        formated_context= "\n".join("<" + str(doc.metadata['chunk_number']) + ">" + doc.page_content +
+        formated_contexts = [(doc.metadata['file_id'], "<" + str(doc.metadata['chunk_number']) + ">" + doc.page_content +
+                            "</" + str(doc.metadata['chunk_number']) + ">") for doc in docs]
+
+        self._latest_context = formated_contexts
+
+        formated_documents = "\n".join("<" + str(doc.metadata['chunk_number']) + ">" + doc.page_content +
                             "</" + str(doc.metadata['chunk_number']) + ">" for doc in docs)
 
-        self._latest_context = formated_context 
-        return formated_context 
+        return formated_documents
 
     def get_history(self, _):
         return self._history
