@@ -120,7 +120,7 @@ class Chatbot:
         None
         """
 
-        chunks: List[str] = self.__class__._documentProcessor.load_pdf(file=file)
+        chunks: List[str] = self.__class__._documentProcessor.load_pdf(file=file)["chunks"]
         documents: List[Document] = [Document(
             page_content=chunks[chunk_number],
             metadata={"file_id": file.file_id, "chunk_number": chunk_number + 1}
