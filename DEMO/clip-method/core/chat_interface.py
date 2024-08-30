@@ -27,6 +27,54 @@ class ChatInterface:
         if "file_names" not in st.session_state:
             st.session_state.file_names = []
 
+        # Custom CSS for hover effect
+        st.markdown(
+            """
+            <style>
+            /* General styles for the hover container */
+            .hover-container {
+                display: inline-block;
+                position: relative;
+                color: #1f77b4; /* Streamlit's blue color */
+                font-weight: bold;
+            }
+
+            /* Styles for the hover content */
+            .hover-content {
+                visibility: hidden;
+                background-color: #f0f2f6; /* Light grey background to match Streamlit theme */
+                color: #333; /* Dark text color for readability */
+                text-align: left; /* Default alignment for LTR text */
+                border-radius: 4px; /* Rectangular corners */
+                padding: 10px;
+                position: absolute;
+                z-index: 1;
+                top: 30px;
+                left: 0;
+                box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+                min-width: 400px; /* Minimum width to ensure it is wider */
+                max-width: 600px; /* Maximum width to keep it within reasonable bounds */
+                width: auto; /* Let width adapt based on content and constraints */
+                direction: ltr; /* Default direction for LTR languages */
+            }
+
+            /* Adjust hover content based on text direction */
+            .hover-container[dir="rtl"] .hover-content {
+                direction: rtl; /* Text direction for RTL languages */
+                text-align: right; /* Align text to the right for RTL languages */
+                left: auto; /* Position from the right for RTL languages */
+                right: 0; /* Align the content to the right edge */
+            }
+
+            /* Show the hover content on hover */
+            .hover-container:hover .hover-content {
+                visibility: visible;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
         with st.sidebar:
             st.header("Upload PDF Files")
             current_files = []
@@ -76,7 +124,6 @@ class ChatInterface:
                 full_response = ""
                 completion = self.chatbot.get_response(query=user_input, history=st.session_state.messages, stream=False)
 
-
                 reference_mode = True
                 for response in completion:
                     full_response += response
@@ -89,14 +136,23 @@ class ChatInterface:
                         message_placeholder.markdown(showing_response + "▌")
 
                 message_placeholder.markdown(full_response)
+
                 try:
                     references = [reference[1:-1] for reference in full_response.split('::')[0].split()]
                     print(references)
                     pattern = r'<({})>(.*?)</\1>'.format("|".join(map(str, references)))
                     matches = re.findall(pattern, self.chatbot.get_latest_context(), re.DOTALL)
                     extracted_texts = [match[1].strip() + "\n\n\n" for match in matches]
-
-                    message_placeholder.markdown(showing_response + "\n\n\n\n**Refrences:**\n\n\n" + "\n".join(extracted_texts))
+                
+                    markdown_message = showing_response + "\n\n\n" \
+                                    '<div class="hover-container">\n' \
+                                    "   <b>Refrences</b>\n" \
+                                    '   <div class="hover-content">\n' \
+                                   f"{'        '.join(extracted_texts)}\n"\
+                                    "   </div>\n" \
+                                    "</div>\n"
+                    
+                    message_placeholder.markdown(markdown_message, unsafe_allow_html=True)
 
 
                 except:
