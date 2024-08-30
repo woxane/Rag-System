@@ -4,6 +4,7 @@ from collections import OrderedDict
 from typing import List, Iterator, Dict, Tuple
 from uuid import uuid4, UUID
 from pymilvus import MilvusClient
+from openai import OpenAI as lm_studio
 
 from langchain_milvus import Milvus
 from langchain_openai import OpenAI, OpenAIEmbeddings
@@ -181,6 +182,46 @@ class Chatbot:
             chunk_texts[reference_index] = "<mark style='background-color: yellow'>" + chunk_texts[reference_index] + "</mark>"
         
         return " ".join(chunk_texts)
+
+
+
+    def analyze_image(self, image_base64: str, response_language: str = "Persian") -> str:
+        llava_model_name = "xtuner/llava-llama-3-8b-v1_1-gguf"
+        client: lm_studio = lm_studio(base_url="http://localhost:1234/v1", api_key="lm-studio")
+
+        analyze_prompt = "Instructions:\n" \
+                         f"- **Responde** in {response_language}.\n" \
+                         "- **Analyze** the whole image in 2 or 3 line.\n" \
+                         "- **List** all features in the image.\n"\
+                         "- If there is any text or table in the image describe a summary of it."
+
+
+        completion = client.chat.completions.create(
+            model=llava_model_name,
+            messages=[
+                {
+                "role": "system",
+                "content": "This is a chat between a user and an assistant. The assistant is helping the user to describe an image.\n" + analyze_prompt,
+                },
+                {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "analyze this image for me."},
+                    {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{image_base64}"
+                    },
+                    },
+                ],
+                }
+            ],
+            max_tokens=500,
+            stream=False
+        )
+
+        return completion.choices[0].message
+
 
 
     def _search_docs(self, query: str) -> List[str]:
