@@ -178,7 +178,7 @@ class Chatbot:
         chunk_texts = list(map(lambda chunk: chunk['text'], near_references))
 
         if reference_index:
-            chunk_texts[reference_index] = "<mark>" + chunk_texts[reference_index] + "</mark>"
+            chunk_texts[reference_index] = "<mark style='background-color: yellow'>" + chunk_texts[reference_index] + "</mark>"
         
         return " ".join(chunk_texts)
 
