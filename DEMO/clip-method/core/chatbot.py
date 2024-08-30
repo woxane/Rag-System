@@ -3,6 +3,7 @@ from dotenv import dotenv_values
 from collections import OrderedDict
 from typing import List, Iterator, Dict
 from uuid import uuid4, UUID
+from pymilvus import MilvusClient
 
 from langchain_milvus import Milvus
 from langchain_openai import OpenAI, OpenAIEmbeddings
@@ -64,6 +65,10 @@ class Chatbot:
         drop_old=True,
     )
 
+    _pymilvus_client: MilvusClient = MilvusClient(
+        uri=_env_values["milvus_uri"]
+    )
+
     def __init__(self, prompt_template: str = _prompt_template, limit: int = 3):
         self._history = None
         self._latest_contexts = None
@@ -123,7 +128,8 @@ class Chatbot:
         chunks: List[str] = self.__class__._documentProcessor.load_pdf(file=file)["chunks"]
         documents: List[Document] = [Document(
             page_content=chunks[chunk_number],
-            metadata={"file_id": file.file_id,"file_name": file.file_name "chunk_number": chunk_number + 1}
+            # metadata={"file_id": file.file_id, "file_name": file.file_name, "chunk_number": chunk_number + 1}
+            metadata={"file_id": "asd", "file_name": "fuck", "chunk_number": chunk_number + 1}
         ) for chunk_number in range(len(chunks))]
         document_ids: List[str] = [str(uuid4()) for _ in documents]
         self.__class__._milvus.add_documents(documents=documents, ids=document_ids)
@@ -142,6 +148,41 @@ class Chatbot:
         """
         documents_id: List[str] = self.__class__._milvus.get_pks(expr=f"file_id == '{file_id}'")
         self.__class__._milvus.delete(ids=documents_id)
+
+    def get_formatted_references(self, chunk_number: int, file_id: str) -> str:
+        """
+        Get texts near the real reference by given chunk_number.
+
+        This method Filters and sorts the chunks based on their proximity to the given chunk_number.
+
+        Parameters:
+        file_id (list): The file id of the reference text.
+        chunk_number (int): The reference chunk number to filter around.
+
+        Returns:
+            list: Sorted list of chunks near the specified chunk_number.
+        """
+        file_datas = self.__class__._pymilvus_client.query(
+            collection_name=self.__class__._env_values['collection_name'],
+            filter=f"file_id == '{file_id}'"
+        )
+
+        near_references = sorted(
+            filter(lambda file_data:
+                    chunk_number - 1 <= int(file_data['chunk_number']) <= chunk_number + 1, file_datas),
+                    key=lambda data: data['chunk_number']
+        )
+
+        near_references = sorted(near_references, key=lambda data: data['chunk_number'])
+
+        reference_index = next((i for i, chunk in enumerate(near_references) if int(chunk['chunk_number']) == chunk_number), None)
+        chunk_texts = list(map(lambda chunk: chunk['text'], near_references))
+
+        if reference_index:
+            chunk_texts[reference_index] = "<mark>" + chunk_texts[reference_index] + "</mark>"
+        
+        return " ".join(chunk_texts)
+
 
     def _search_docs(self, query: str) -> List[str]:
         """
