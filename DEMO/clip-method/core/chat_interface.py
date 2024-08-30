@@ -139,24 +139,23 @@ class ChatInterface:
 
                 try:
                     references = [reference[1:-1] for reference in full_response.split('::')[0].split()]
-                    print(references)
-                    pattern = r'<({})>(.*?)</\1>'.format("|".join(map(str, references)))
-                    matches = re.findall(pattern, self.chatbot.get_latest_context(), re.DOTALL)
-                    extracted_texts = [match[1].strip() + "\n\n\n" for match in matches]
-                
-                    markdown_message = showing_response + "\n\n\n" \
-                                    '<div class="hover-container">\n' \
-                                    "   <b>Refrences</b>\n" \
-                                    '   <div class="hover-content">\n' \
-                                   f"{'        '.join(extracted_texts)}\n"\
-                                    "   </div>\n" \
-                                    "</div>\n"
+                    if references and "0" not in references:
+                        pattern = r'<({})>(.*?)</\1>'.format("|".join(map(str, references)))
+                        matches = re.findall(pattern, self.chatbot.get_latest_context(), re.DOTALL)
+                        extracted_texts = [match[1].strip() + "\n\n\n" for match in matches]
                     
-                    message_placeholder.markdown(markdown_message, unsafe_allow_html=True)
-
+                        markdown_message = showing_response + "\n\n\n" \
+                                        '<div class="hover-container">\n' \
+                                        "   <b>Refrences</b>\n" \
+                                        '   <div class="hover-content">\n' \
+                                       f"{'        '.join(extracted_texts)}\n"\
+                                        "   </div>\n" \
+                                        "</div>\n"
+                        
+                        message_placeholder.markdown(markdown_message, unsafe_allow_html=True)
 
                 except:
-                    print("OK")
+                    print("ERROR ")
 
             st.session_state.messages.append({'role': 'user', 'content': user_input})
             st.session_state.messages.append({'role': 'assistant', 'content': full_response})
