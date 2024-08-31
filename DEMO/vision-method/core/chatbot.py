@@ -5,6 +5,7 @@ from typing import List, Iterator, Dict, Tuple
 from uuid import uuid4, UUID
 from pymilvus import MilvusClient
 from openai import OpenAI as lm_studio
+from PIL import Image
 
 from langchain_milvus import Milvus
 from langchain_openai import OpenAI, OpenAIEmbeddings
@@ -106,6 +107,13 @@ class Chatbot:
             assistant_header_tag=self.__class__._assistant_header_tag,
             histories=history,
         )
+
+        first_context = self._retriever.invoke(query)[0]
+        is_image = first_context.metadata['data_type'] == 'image'
+
+        if is_image:
+            file_path = first_context.metadata['file_path']
+            return Image.open(file_path) 
 
         if stream:
             return self._rag_chain.stream(query)
