@@ -37,6 +37,7 @@ class DocumentProcessor:
         Dict[str, List[Any]] = chunks: chunks that separated using RecursiveCharacterTextSplitter
                                images: images that finded in the pdf file.
         """
+        # TODO: change the way of saving file path
         pdf_document = fitz.open(stream=file.read(), filetype="pdf")
         text = ""
         pdf = {"chunks": [], "images": []}
@@ -57,9 +58,10 @@ class DocumentProcessor:
                 image = Image.open(io.BytesIO(image_bytes))
                 image_format = image.format
 
-                image.save(f"{file.file_id}_{page_num}_{image_index}.{image_format.lower()}")
+                file_path = f"{file.file_id}_{page_num}_{image_index}.{image_format.lower()}"
+                image.save(file_path)
 
-                pdf['images'].append(image_b64)
+                pdf['images'].append((file_path, image_b64))
 
         pdf_document.close()
 
