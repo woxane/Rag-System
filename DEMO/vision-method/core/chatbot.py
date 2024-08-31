@@ -44,7 +44,7 @@ class Chatbot:
                             "<|eot_id|><|start_header_id|>user<|end_header_id|>\n" \
                             "{question}\n" \
                             "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-
+    
     _env_values: OrderedDict = dotenv_values(dotenv_path)
 
     _documentProcessor: DocumentProcessor = DocumentProcessor(chunk_size=int(_env_values["chunk_size"]))
@@ -125,24 +125,26 @@ class Chatbot:
         Returns:
         None
         """
+        # TODO: change the way of saving file path
         docs = []
 
         pdf_data = self.__class__._documentProcessor.load_pdf(file=file)
         chunks = pdf_data['chunks']
         images = pdf_data['images']
-        images_analyzation = [self.analyze_image(image) for image in images]
+        images_analyzation = [(self.analyze_image(image), file_path) for image, file_path in images]
 
-        docs.append(("text", chunks))
+        docs.append(("text", (chunks, "None")))
         docs.append(("image", images_analyzation))
          
         documents = [
             Document(
-                page_content=data,
+                page_content=data[0],
                 metadata={
                     "file_id": file.file_id,
                     "file_name": file.name,
                     "chunk_number": idx + 1,
-                    "data_type": data_type
+                    "data_type": data_type,
+                    "file_path": data[1]
                 }
             )
             for data_type, datas in docs
