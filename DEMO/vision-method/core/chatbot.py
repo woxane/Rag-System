@@ -6,6 +6,8 @@ from uuid import uuid4, UUID
 from pymilvus import MilvusClient
 from openai import OpenAI as lm_studio
 from PIL import Image
+import base64
+from io import BytesIO
 
 from langchain_milvus import Milvus
 from langchain_openai import OpenAI, OpenAIEmbeddings
@@ -132,14 +134,31 @@ class Chatbot:
         first_context = self._retriever.invoke(query)[0]
         is_image = first_context.metadata['data_type'] == 'image'
 
+        base_content = ""
+        chain = self._rag_chain
+
         if is_image:
             file_path = first_context.metadata['file_path']
-            return Image.open(file_path) 
+            image = Image.open(file_path)
+
+            with open(file_path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode()
+
+            buffered = BytesIO()
+            image.save(buffered, format=image.format)
+
+            mime_type = f"image/{image.format.lower()}"
+
+            image_b64 = base64.b64encode(buffered.getvalue()).decode()
+
+            base_content = f'<img src="data:{mime_type};base64,{image_b64}" alt="alt text">'
+
+            chain = self._rag_analyize_chain
 
         if stream:
-            return self._rag_chain.stream(query)
+            return base_content + chain.stream(query)
 
-        return self._rag_chain.invoke(query)
+        return base_content + chain.invoke(query)
 
     def save_pdf(self, file) -> None:
         """
