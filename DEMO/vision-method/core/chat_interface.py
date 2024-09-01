@@ -1,7 +1,6 @@
 import streamlit as st
 from chatbot import Chatbot
 import re
-import PIL
 
 dotenv_path = ".env"
 
@@ -125,45 +124,40 @@ class ChatInterface:
                 full_response = ""
                 completion = self.chatbot.get_response(query=user_input, history=st.session_state.messages, stream=False)
 
-                # TODO: change the way of getting knowledge of this is an image
-                if type(completion) == PIL.PngImagePlugin.PngImageFile:
-                    message_placeholder.image(completion)
+                reference_mode = True
+                for response in completion:
+                    full_response += response
 
-                else:
-                    reference_mode = True
-                    for response in completion:
-                        full_response += response
+                    if "::" in full_response:
+                        reference_mode = False
 
-                        if "::" in full_response:
-                            reference_mode = False
+                    if not reference_mode:
+                        showing_response = full_response.split("::")[1]
+                        message_placeholder.markdown(showing_response + "▌", unsafe_allow_html=True)
 
-                        if not reference_mode:
-                            showing_response = full_response.split("::")[1]
-                            message_placeholder.markdown(showing_response + "▌")
+                message_placeholder.markdown(full_response, unsafe_allow_html=True)
 
-                    message_placeholder.markdown(full_response)
+                # try:
+                references_tag = [int(reference[1:-1]) for reference in full_response.split('::')[0].split()]
+                file_id = self.chatbot.get_latest_context()[0][0]
+                if references_tag and 0 not in references_tag:
+                    references = "<br>".join([self.chatbot.get_formatted_references(tag, file_id) for tag in references_tag])
+                    
+                    markdown_message = showing_response + "\n\n\n" \
+                                    '<div class="hover-container">\n' \
+                                    "   <b>Refrences</b>\n" \
+                                    '   <div class="hover-content">\n' \
+                                    f"        <p>{references}</p>" \
+                                    "   </div>\n" \
+                                    "</div>\n"
+                    
+                    message_placeholder.markdown(markdown_message, unsafe_allow_html=True)
 
-                    # try:
-                    references_tag = [int(reference[1:-1]) for reference in full_response.split('::')[0].split()]
-                    file_id = self.chatbot.get_latest_context()[0][0]
-                    if references_tag and 0 not in references_tag:
-                        references = "<br>".join([self.chatbot.get_formatted_references(tag, file_id) for tag in references_tag])
-                        
-                        markdown_message = showing_response + "\n\n\n" \
-                                        '<div class="hover-container">\n' \
-                                        "   <b>Refrences</b>\n" \
-                                        '   <div class="hover-content">\n' \
-                                        f"        <p>{references}</p>" \
-                                        "   </div>\n" \
-                                        "</div>\n"
-                        
-                        message_placeholder.markdown(markdown_message, unsafe_allow_html=True)
+                # except:
+                #     print("ERROR ")
 
-                    # except:
-                    #     print("ERROR ")
-
-                st.session_state.messages.append({'role': 'user', 'content': user_input})
-                st.session_state.messages.append({'role': 'assistant', 'content': full_response})
+            st.session_state.messages.append({'role': 'user', 'content': user_input})
+            st.session_state.messages.append({'role': 'assistant', 'content': full_response})
 
 
 if __name__ == "__main__":
