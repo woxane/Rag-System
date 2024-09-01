@@ -46,6 +46,23 @@ class Chatbot:
                             "{question}\n" \
                             "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
     
+    _analyize_image_prompt: str = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n" \
+                            "You are an intelligent assistant." \
+                            "You always provide well-reasoned answers that are both correct and helpful.\n" \
+                            "The above history is a conversation between you and a human(if there isn't anything that means a new start ).\n" \
+                            "The above context is an analysis of an image. Answer the user's question using the analysis.\n" \
+                            "Instructions:\n" \
+                            "- Provide only the answer; avoid unnecessary talk or explanations.\n" \
+                            "- Provide an accurate and thoughtful answer based on the context if the question is related.\n" \
+                            "- If the question is unrelated or general (like greetings), respond appropriately but without referencing the context.\n" \
+                            "- If you don't know the answer, simply say, I don't know.\n" \
+                            "Contexts:\n" \
+                            "{context}\n" \
+                            "{history}\n" \
+                            "<|eot_id|><|start_header_id|>user<|end_header_id|>\n" \
+                            "{question}\n" \
+                            "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
+    
     _env_values: OrderedDict = dotenv_values(dotenv_path)
 
     _documentProcessor: DocumentProcessor = DocumentProcessor(chunk_size=int(_env_values["chunk_size"]))
@@ -77,10 +94,14 @@ class Chatbot:
         self.prompt_template = prompt_template
         self.limit = limit
         self._rag_prompt: PromptTemplate = PromptTemplate.from_template(prompt_template)
+        self._rag_analyize_prompt: PromptTemplate = PromptTemplate.from_template(self.__class__._analyize_image_prompt)
         self._retriever = self.__class__._milvus.as_retriever(search_type="similarity", search_kwargs={"k": limit})
 
         self._rag_chain = {"context": self._retriever | self._format_doc, "history": RunnableLambda(self.get_history),
                            "question": RunnablePassthrough()} | self._rag_prompt | self.__class__._llm | StrOutputParser()
+        
+        self._rag_analyize_chain = {"context": self._retriever | self._format_doc, "history": RunnableLambda(self.get_history),
+                                    "question": RunnablePassthrough()} | self._rag_analyize_prompt | self.__class__._llm | StrOutputParser()
 
     def __repr__(self):
         return (f"{self.__class__.__name__}("
