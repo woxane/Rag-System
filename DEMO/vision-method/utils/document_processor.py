@@ -66,5 +66,7 @@ class DocumentProcessor:
         pdf_document.close()
 
         text = text.replace("\n", " ")
-        pdf['chunks'] = self.text_splitter.split_text(text)
+
+        chunks = list(map(lambda chunk: (chunk, "None"), self.text_splitter.split_text(text)))
+        pdf['chunks'] = chunks
         return pdf 
