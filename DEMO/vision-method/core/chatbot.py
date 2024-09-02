@@ -139,6 +139,7 @@ class Chatbot:
 
         if is_image:
             file_path = first_context.metadata['file_path']
+            print(file_path)
             image = Image.open(file_path)
 
             with open(file_path, "rb") as image_file:
@@ -179,10 +180,28 @@ class Chatbot:
         pdf_data = self.__class__._documentProcessor.load_pdf(file=file)
         chunks = pdf_data['chunks']
         images = pdf_data['images']
-        images_analyzation = [(self.analyze_image(image), file_path) for image, file_path in images]
+        
+        # TODO: DELETE THIS PART
+        input("Wainting to load the vision model")
+        print("lengths of images: " ,len(images))
+        print("length of chunks: ", len(chunks))
 
-        docs.append(("text", (chunks, "None")))
+        test = "The image presents a dramatic scene set outdoors at night. The main subject is a woman, seated on the ground in front of a large tree trunk. She is holding a sword in her hand, suggesting some form of combat or struggle.\nBehind her, two figures can be seen. These individuals are also armed with swords and shields, reinforcing the impression of conflict."
+
+        images_analyzation = [(test, file_path) for file_path, image in images]
+        input("Unload the vision model")
+        for i in chunks:
+            print(i)
+        
+        for i in images_analyzation:
+            print(i)
+
+        docs.append(("text", chunks))
         docs.append(("image", images_analyzation))
+
+        print('----')
+        print(docs)
+        print('----')
          
         documents = [
             Document(
@@ -278,7 +297,7 @@ class Chatbot:
                     {
                     "type": "image_url",
                     "image_url": {
-                        "url": f"data:image/jpeg;base64,{image_base64}"
+                        "url": f"data:image/png;base64,{image_base64}"
                     },
                     },
                 ],
@@ -288,7 +307,7 @@ class Chatbot:
             stream=False
         )
 
-        return completion.choices[0].message
+        return completion.choices[0].message.content
 
 
 
