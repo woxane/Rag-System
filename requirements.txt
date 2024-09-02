@@ -161,6 +161,7 @@ rpds-py==0.20.0
 safetensors==0.4.4
 scikit-learn==1.5.1
 scipy==1.14.0
+seaborn==0.13.2
 Send2Trash==1.8.3
 sentence-transformers==3.0.1
 shapely==2.0.6
