@@ -48,7 +48,7 @@ class Chatbot:
                             "<|eot_id|><|start_header_id|>user<|end_header_id|>\n" \
                             "{question}\n" \
                             "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-    
+
     _analyize_image_prompt: str = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n" \
                             "You are an intelligent assistant." \
                             "You always provide well-reasoned answers that are both correct and helpful.\n" \
@@ -65,7 +65,7 @@ class Chatbot:
                             "<|eot_id|><|start_header_id|>user<|end_header_id|>\n" \
                             "{question}\n" \
                             "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-    
+
     _env_values: OrderedDict = dotenv_values(dotenv_path)
 
     _documentProcessor: DocumentProcessor = DocumentProcessor(chunk_size=int(_env_values["chunk_size"]))
@@ -103,7 +103,7 @@ class Chatbot:
 
         self._rag_chain = {"context": self._retriever | self._format_doc, "history": RunnableLambda(self.get_history),
                            "question": RunnablePassthrough()} | self._rag_prompt | self.__class__._llm | StrOutputParser()
-        
+
         self._rag_analyize_chain = {"context": self._retriever | self._format_doc, "history": RunnableLambda(self.get_history),
                                     "question": RunnablePassthrough()} | self._rag_analyize_prompt | self.__class__._llm | StrOutputParser()
 
@@ -181,25 +181,42 @@ class Chatbot:
         pdf_data = self.__class__._documentProcessor.load_pdf(file=file)
         chunks = pdf_data['chunks']
         images = pdf_data['images']
-        images_analyzation = [(self.analyze_image(image), file_path) for file_path, image in images]
+        images_analyzation = [(self.analyze_image(image), file_path, image_info) for file_path, image, image_info in images]
 
-        docs.append(("text", chunks))
-        docs.append(("image", images_analyzation))
-         
-        documents = [
+
+        documents = []
+
+        documents.append(
             Document(
-                page_content=data[0],
+                page_content=chunk[0],
                 metadata={
                     "file_id": file.file_id,
                     "file_name": file.name,
                     "chunk_number": idx + 1,
-                    "data_type": data_type,
-                    "file_path": data[1]
+                    "data_type": "Text",
+                    "file_path": "",
+                    "page_num": "",
+                    "image_num": "",
                 }
             )
-            for data_type, datas in docs
-            for idx, data in enumerate(datas)
-        ]
+            for idx, chunk in enumerate(chunks)
+        )
+
+        documents.append(
+            Document(
+                page_content=analyze,
+                metadata={
+                    "file_id": file.file_id,
+                    "file_name": file.name,
+                    "chunk_number": idx + 1,
+                    "data_type": "image-analyze",
+                    "file_path": file_path,
+                    "page_num": image_info['page_num'],
+                    "image_num": image_info['image_num'],
+                }
+            )
+            for idx, (analyze, file_path, image_info) in enumerate(images_analyzation)
+        )
 
         document_ids: List[str] = [str(uuid4()) for _ in documents]
         self.__class__._milvus.add_documents(documents=documents, ids=document_ids)
@@ -250,7 +267,7 @@ class Chatbot:
 
         if reference_index:
             chunk_texts[reference_index] = "<mark style='background-color: yellow'>" + chunk_texts[reference_index] + "</mark>"
-        
+
         return " ".join(chunk_texts)
 
 
@@ -336,6 +353,6 @@ class Chatbot:
 
     def get_history(self, _):
         return self._history
-    
+
     def get_latest_context(self):
         return self._latest_context
