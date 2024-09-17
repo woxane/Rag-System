@@ -12,7 +12,7 @@ class ChatInterface:
     def display_chat(self, messages):
         for message in messages:
             with st.chat_message(message["role"]):
-                st.markdown(message["content"])
+                st.markdown(message["content"], unsafe_allow_html=True)
 
     def run(self):
         st.title("PDF Helper")
