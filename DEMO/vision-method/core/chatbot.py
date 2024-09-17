@@ -57,7 +57,6 @@ class Chatbot:
 
     # Do not check the token length of inputs and automatically split inputs
     # longer than embedding_ctx_length. (Won't work with nomic-embed-text)
-    _embedding.check_embedding_ctx_length = False
     _llm: OpenAI = OpenAI(base_url=_env_values["openAI_base_url"],
                           api_key=_env_values["openAI_api_key"],
                           model=_env_values["LLM_model_name"])
@@ -74,18 +73,15 @@ class Chatbot:
 
     def __init__(self, prompt_template: str = _prompt_template, limit: int = 3):
         self._history = None
-        self._latest_contexts = None
+        self._used_contexts = []
         self.prompt_template = prompt_template
         self.limit = limit
         self._rag_prompt: PromptTemplate = PromptTemplate.from_template(prompt_template)
-        self._rag_analyize_prompt: PromptTemplate = PromptTemplate.from_template(self.__class__._analyize_image_prompt)
         self._retriever = self.__class__._milvus.as_retriever(search_type="similarity", search_kwargs={"k": limit})
 
         self._rag_chain = {"context": self._retriever | self._format_doc, "history": RunnableLambda(self.get_history),
                            "question": RunnablePassthrough()} | self._rag_prompt | self.__class__._llm | StrOutputParser()
 
-        self._rag_analyize_chain = {"context": self._retriever | self._format_doc, "history": RunnableLambda(self.get_history),
-                                    "question": RunnablePassthrough()} | self._rag_analyize_prompt | self.__class__._llm | StrOutputParser()
 
     def __repr__(self):
         return (f"{self.__class__.__name__}("
@@ -141,40 +137,39 @@ class Chatbot:
         images = pdf_data['images']
         images_analyzation = [(self.analyze_image(image), file_path, image_info) for file_path, image, image_info in images]
 
-
         documents = []
 
-        documents.append(
-            Document(
-                page_content=chunk[0],
-                metadata={
-                    "file_id": file.file_id,
-                    "file_name": file.name,
-                    "chunk_number": idx + 1,
-                    "data_type": "text",
-                    "file_path": "",
-                    "page_num": "",
-                    "image_num": "",
-                }
-            )
-            for idx, chunk in enumerate(chunks)
-        )
+        for idx, chunk in enumerate(chunks):
+            documents.append(
+                Document(
+                    page_content=chunk[0],
+                    metadata={
+                        "file_id": file.file_id,
+                        "file_name": file.name,
+                        "chunk_number": idx + 1,
+                        "data_type": "text",
+                        "file_path": "",
+                        "page_num": "",
+                        "image_num": "",
+                    }
+                )
+            ) 
 
-        documents.append(
-            Document(
-                page_content=analyze,
-                metadata={
-                    "file_id": file.file_id,
-                    "file_name": file.name,
-                    "chunk_number": idx + 1,
-                    "data_type": "image-analyze",
-                    "file_path": file_path,
-                    "page_num": image_info['page_num'],
-                    "image_num": image_info['image_num'],
-                }
-            )
-            for idx, (analyze, file_path, image_info) in enumerate(images_analyzation)
-        )
+        for idx, (analyze, file_path, image_info) in enumerate(images_analyzation, len(chunks)):
+            documents.append(
+                Document(
+                    page_content=analyze,
+                    metadata={
+                        "file_id": file.file_id,
+                        "file_name": file.name,
+                        "chunk_number": idx + 1,
+                        "data_type": "image-analyze",
+                        "file_path": file_path,
+                        "page_num": str(image_info['page_num']),
+                        "image_num": str(image_info['image_num']),
+                    }
+                )
+            )   
 
         document_ids: List[str] = [str(uuid4()) for _ in documents]
         self.__class__._milvus.add_documents(documents=documents, ids=document_ids)
@@ -208,9 +203,11 @@ class Chatbot:
             list: Sorted list of chunks near the specified chunk_number.
         """
 
-        documents = self._latest_contexts
+        documents = self._used_contexts
 
         references = []
+        if not documents:
+            return []
 
         for document in documents:
             if document.metadata['data_type'] == 'text':
@@ -330,7 +327,7 @@ class Chatbot:
         Returns:
         str: output of joins on the page contents.
         """
-        self._latest_context = docs
+        self._used_contexts = list(docs)
 
         formated_documents = "\n".join(doc.page_content for doc in docs)
 
@@ -340,4 +337,4 @@ class Chatbot:
         return self._history
 
     def get_latest_context(self):
-        return self._latest_context
+        return self._used_contexts
