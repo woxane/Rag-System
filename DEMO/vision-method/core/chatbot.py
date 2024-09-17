@@ -34,11 +34,11 @@ class Chatbot:
                             "You always provide well-reasoned answers that are both correct and helpful.\n" \
                             "The above history is a conversation between you and a human (if there isn't anything, it means a new start).\n" \
                             "Instructions:\n" \
+                            "- Detect the language of the user's question and respond in the same language, even if the context is in a different language.\n" \
                             "- Provide only the answer; avoid unnecessary talk or explanations.\n" \
                             "- Provide an accurate and thoughtful answer based on the context, whether it is related to an image analysis or a text-based context.\n" \
                             "- If the question is unrelated or general (like greetings), respond appropriately but without referencing the context.\n" \
                             "- If you don't know the answer, simply say, 'I don't know.'\n" \
-                            "- Always respond in the language the user asked the question in, even if the context is in a different language.\n" \
                             "Contexts:\n" \
                             "{context}\n" \
                             "{history}\n" \
