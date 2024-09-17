@@ -6,7 +6,8 @@ from uuid import uuid4, UUID
 from pymilvus import MilvusClient
 
 from langchain_milvus import Milvus
-from langchain_openai import OpenAI, OpenAIEmbeddings
+from langchain_openai import OpenAI
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
@@ -48,10 +49,11 @@ class Chatbot:
 
     _documentProcessor: DocumentProcessor = DocumentProcessor(chunk_size=int(_env_values["chunk_size"]))
 
-    # Use nomic-embed-text to utilize all models we use from lm-studio
-    _embedding: OpenAIEmbeddings = OpenAIEmbeddings(model="nomic-ai/nomic-embed-text-v1.5-GGUF",
-                                                    base_url=_env_values["openAI_base_url"],
-                                                    api_key=_env_values["openAI_api_key"])
+    _embedding_model_name = "Alibaba-NLP/gte-multilingual-base"
+    _embedding_model_kwargs = {"trust_remote_code": True}
+    _embedding: HuggingFaceEmbeddings = HuggingFaceEmbeddings(model_name=_embedding_model_name,
+                                                              model_kwargs=_embedding_model_kwargs)
+
     # Do not check the token length of inputs and automatically split inputs
     # longer than embedding_ctx_length. (Won't work with nomic-embed-text)
     _embedding.check_embedding_ctx_length = False
