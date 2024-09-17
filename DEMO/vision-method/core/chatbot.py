@@ -32,33 +32,13 @@ class Chatbot:
     _prompt_template: str = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n" \
                             "You are an intelligent assistant." \
                             "You always provide well-reasoned answers that are both correct and helpful.\n" \
-                            "The above history is a conversation between you and a human(if there isn't anything that means a new start ).\n" \
-                            "Each provided context have an their own ID at the start like this: <ID>context</ID>\n" \
-                            "Instructions:\n" \
-                            "- **List** the tagged IDs of the contexts you use to answer the user at the start of your response with this format: `<id> <id> ...`. If no context is used, put `<0>::`. \n" \
-                            "- **Do not** include any text before the context IDs. \n" \
-                            "- **Separate** the context IDs from your answer using `::`.\n" \
-                            "- Provide only the answer; avoid unnecessary talk or explanations.\n" \
-                            "- Provide an accurate and thoughtful answer based on the context if the question is related.\n" \
-                            "- If the question is unrelated or general (like greetings), respond appropriately but without referencing the context.\n" \
-                            "- If you don't know the answer, simply say, I don't know.\n" \
-                            "Contexts:\n" \
-                            "{context}\n" \
-                            "{history}\n" \
-                            "<|eot_id|><|start_header_id|>user<|end_header_id|>\n" \
-                            "{question}\n" \
-                            "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-
-    _analyize_image_prompt: str = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n" \
-                            "You are an intelligent assistant." \
-                            "You always provide well-reasoned answers that are both correct and helpful.\n" \
-                            "The above history is a conversation between you and a human(if there isn't anything that means a new start ).\n" \
-                            "The above context is an analysis of an image. Answer the user's question using the analysis.\n" \
+                            "The above history is a conversation between you and a human (if there isn't anything, it means a new start).\n" \
                             "Instructions:\n" \
                             "- Provide only the answer; avoid unnecessary talk or explanations.\n" \
-                            "- Provide an accurate and thoughtful answer based on the context if the question is related.\n" \
+                            "- Provide an accurate and thoughtful answer based on the context, whether it is related to an image analysis or a text-based context.\n" \
                             "- If the question is unrelated or general (like greetings), respond appropriately but without referencing the context.\n" \
-                            "- If you don't know the answer, simply say, I don't know.\n" \
+                            "- If you don't know the answer, simply say, 'I don't know.'\n" \
+                            "- Always respond in the language the user asked the question in, even if the context is in a different language.\n" \
                             "Contexts:\n" \
                             "{context}\n" \
                             "{history}\n" \
