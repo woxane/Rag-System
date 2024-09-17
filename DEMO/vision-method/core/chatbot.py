@@ -341,13 +341,9 @@ class Chatbot:
         Returns:
         str: output of joins on the page contents.
         """
-        formated_contexts = [(doc.metadata['file_id'], "<" + str(doc.metadata['chunk_number']) + ">" + doc.page_content +
-                            "</" + str(doc.metadata['chunk_number']) + ">") for doc in docs]
+        self._latest_context = docs
 
-        self._latest_context = formated_contexts
-
-        formated_documents = "\n".join("<" + str(doc.metadata['chunk_number']) + ">" + doc.page_content +
-                            "</" + str(doc.metadata['chunk_number']) + ">" for doc in docs)
+        formated_documents = "\n".join(doc.page_content for doc in docs)
 
         return formated_documents
 
