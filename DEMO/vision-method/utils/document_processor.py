@@ -59,9 +59,15 @@ class DocumentProcessor:
                 image_format = image.format
 
                 file_path = f"{file.file_id}_{page_num}_{image_index}.{image_format.lower()}"
+
+                image_info = {
+                    "page_num": page_num,
+                    "image_num": image_index
+                }
+
                 image.save(file_path)
 
-                pdf['images'].append((file_path, image_b64))
+                pdf['images'].append((file_path, image_b64, image_info))
 
         pdf_document.close()
 
