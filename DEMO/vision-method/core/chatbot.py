@@ -171,7 +171,7 @@ class Chatbot:
                     "file_id": file.file_id,
                     "file_name": file.name,
                     "chunk_number": idx + 1,
-                    "data_type": "Text",
+                    "data_type": "text",
                     "file_path": "",
                     "page_num": "",
                     "image_num": "",
@@ -214,7 +214,7 @@ class Chatbot:
         documents_id: List[str] = self.__class__._milvus.get_pks(expr=f"file_id == '{file_id}'")
         self.__class__._milvus.delete(ids=documents_id)
 
-    def get_formatted_references(self, chunk_number: int, file_id: str) -> str:
+    def get_formatted_references(self) -> List[str]:
         """
         Get texts near the real reference by given chunk_number.
 
@@ -227,26 +227,57 @@ class Chatbot:
         Returns:
             list: Sorted list of chunks near the specified chunk_number.
         """
-        file_datas = self.__class__._pymilvus_client.query(
-            collection_name=self.__class__._env_values['collection_name'],
-            filter=f"file_id == '{file_id}'"
-        )
 
-        near_references = sorted(
-            filter(lambda file_data:
-                    chunk_number - 1 <= int(file_data['chunk_number']) <= chunk_number + 1, file_datas),
+        documents = self._latest_contexts
+
+        references = []
+
+        for document in documents:
+            if document.metadata['data_type'] == 'text':
+                file_datas = self.__class__._pymilvus_client.query(
+                    collection_name=self.__class__._env_values['collection_name'],
+                    filter=f"file_id == '{document.metadata['file_id']}'"
+                )
+
+                chunk_number = document.metadata['chunk_number']
+
+                near_references = sorted(
+                    filter(lambda file_data:
+                           chunk_number - 1 <= int(file_data['chunk_number']) <= chunk_number + 1, file_datas),
                     key=lambda data: data['chunk_number']
-        )
+                )
 
-        near_references = sorted(near_references, key=lambda data: data['chunk_number'])
+                near_references = sorted(near_references, key=lambda data: data['chunk_number'])
 
-        reference_index = next((i for i, chunk in enumerate(near_references) if int(chunk['chunk_number']) == chunk_number), None)
-        chunk_texts = list(map(lambda chunk: chunk['text'], near_references))
+                reference_index = next((i for i, chunk in enumerate(near_references) if int(chunk['chunk_number']) == chunk_number), None)
+                chunk_texts = list(map(lambda chunk: chunk['text'], near_references))
 
-        if reference_index:
-            chunk_texts[reference_index] = "<mark style='background-color: yellow'>" + chunk_texts[reference_index] + "</mark>"
+                if reference_index:
+                    chunk_texts[reference_index] = "<mark style='background-color: yellow'>" + chunk_texts[reference_index] + "</mark>"
 
-        return " ".join(chunk_texts)
+                references.append(" ".join(chunk_texts))
+
+            elif document.metadata['data_type'] == 'image-analyze':
+                try:
+                    file_path = document.metadata['file_path']
+                    image = Image.open(file_path)
+
+                    buffered = BytesIO()
+                    image.save(buffered, format=image.format)
+
+                    mime_type = f"image/{image.format.lower()}"
+
+                    image_b64 = base64.b64encode(buffered.getvalue()).decode()
+
+                    image_tag = f'<img src="data:{mime_type};base64,{image_b64}" alt="alt text">'
+                    information_tag = f"<p>This image located in {document.metadata['file_name']} at page number {document.metadata['page_num']} </p>"
+
+                    references.append(image_tag + '\n' + information_tag)
+
+                except Exception as e:
+                    print(e)
+
+        return references
 
 
 
