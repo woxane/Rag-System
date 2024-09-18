@@ -11,8 +11,9 @@ class ChatInterface:
 
     def display_chat(self, messages):
         for message in messages:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"], unsafe_allow_html=True)
+            if message['role'] != 'assistant_without_references':
+                with st.chat_message(message["role"]):
+                    st.markdown(message["content"], unsafe_allow_html=True)
 
     def run(self):
         st.title("PDF Helper")
@@ -132,18 +133,21 @@ class ChatInterface:
 
                 references = self.chatbot.get_formatted_references()
 
+                response_with_references = full_response
+
                 for idx, reference in enumerate(references, 1):
-                    full_response += '<div class="hover-container">\n' \
+                    response_with_references += '<div class="hover-container">\n' \
                                      f"   <b>Reference {idx}</b>\n" \
                                      '   <div class="hover-content">\n' \
                                      f"        {reference}" \
                                      "   </div>\n" \
                                      "</div>\n"
 
-                    message_placeholder.markdown(full_response, unsafe_allow_html=True)
+                    message_placeholder.markdown(response_with_references, unsafe_allow_html=True)
 
             st.session_state.messages.append({'role': 'user', 'content': user_input})
-            st.session_state.messages.append({'role': 'assistant', 'content': full_response})
+            st.session_state.messages.append({'role': 'assistant', 'content': response_with_references})
+            st.session_state.messages.append({'role': 'assistant_without_references', 'content': full_response})
 
 
 if __name__ == "__main__":
