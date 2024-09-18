@@ -2,6 +2,12 @@ from dotenv import load_dotenv, set_key, dotenv_values
 from collections import OrderedDict
 from typing import Any
 from os import system
+import atexit
+from sys import path
+
+path.append('../')
+
+from utils.document_processor import DocumentProcessor
 
 dotenv_path = ".env"
 
@@ -56,6 +62,8 @@ def update_env():
 
 
 if __name__ == "__main__":
+    atexit.register(DocumentProcessor.data_clean_up)
+
     # TODO: implement check_env function
     print("Welcome to Rag System project !")
 
