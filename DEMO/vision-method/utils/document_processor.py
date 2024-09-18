@@ -11,9 +11,8 @@ import glob
 
 class DocumentProcessor:
     _separators: List[str] = [".", ","]
-
+    base_directory = ".data/"
     def __init__(self, chunk_size: int = 400):
-        self.base_directory = ".data/"
         self.chunk_size = chunk_size
         self.text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(
             separators=self._separators,
@@ -84,7 +83,7 @@ class DocumentProcessor:
         return pdf
 
     def delete_images(self, file_id: str) -> List[str]:
-        pattern = os.path.join(self.base_directory, f'*{file_id}*')
+        pattern = os.path.join(self.__class__.base_directory, f'*{file_id}*')
 
         files_to_delete = glob.glob(pattern)
 
@@ -95,3 +94,15 @@ class DocumentProcessor:
                 print(f"Error: {file_path} : {e.strerror}")
 
         return files_to_delete
+
+    @classmethod
+    def data_clean_up(cls):
+        pattern = os.path.join(cls.base_directory, '*')
+
+        files_to_delete = glob.glob(pattern)
+
+        for file_path in files_to_delete:
+            try:
+                os.remove(file_path)
+            except OSError as e:
+                print(f"Error: {file_path} : {e.strerror}")
