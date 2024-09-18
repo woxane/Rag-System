@@ -187,6 +187,7 @@ class Chatbot:
         None
         """
         documents_id: List[str] = self.__class__._milvus.get_pks(expr=f"file_id == '{file_id}'")
+        deleted_images: List[str] = self.__class__._documentProcessor.delete_images(file_id=file_id)
         self.__class__._milvus.delete(ids=documents_id)
 
     def get_formatted_references(self) -> List[str]:
