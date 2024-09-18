@@ -29,8 +29,12 @@ def encode_history(user_header_tag: str, assistant_header_tag: str, histories: L
         if history['role'] == 'user':
             history_structure += user_header_tag + "\n"
 
-        else:
+        elif history['role'] == 'assistant_without_references':
             history_structure += assistant_header_tag + "\n"
+
+        elif history['role'] == 'assistant':
+            # do not add the responses with the references and html tags
+            continue
 
         history_structure += history["content"] + "\n"
 
