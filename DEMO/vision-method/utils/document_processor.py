@@ -5,13 +5,14 @@ from typing import List, Dict, Any
 from PIL import Image
 import io
 import base64
-
+import os
 
 
 class DocumentProcessor:
     _separators: List[str] = [".", ","]
 
     def __init__(self, chunk_size: int = 400):
+        self.base_directory = ".data/"
         self.chunk_size = chunk_size
         self.text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(
             separators=self._separators,
@@ -19,7 +20,6 @@ class DocumentProcessor:
             length_function=len,
             is_separator_regex=False,
         )
-
 
     def __repr__(self):
         return f"{self.__class__.__name__}(chunk_size={self.chunk_size!r})"
@@ -58,12 +58,17 @@ class DocumentProcessor:
                 image = Image.open(io.BytesIO(image_bytes))
                 image_format = image.format
 
-                file_path = f"{file.file_id}_{page_num}_{image_index}.{image_format.lower()}"
+                file_path = f"{self.base_directory}{file.file_id}_{page_num}_{image_index}.{image_format.lower()}"
 
                 image_info = {
                     "page_num": page_num,
                     "image_num": image_index
                 }
+
+                directory = os.path.dirname(file_path)
+
+                if not os.path.exists(directory):
+                    os.makedirs(directory)
 
                 image.save(file_path)
 
@@ -75,4 +80,4 @@ class DocumentProcessor:
 
         chunks = list(map(lambda chunk: (chunk, "None"), self.text_splitter.split_text(text)))
         pdf['chunks'] = chunks
-        return pdf 
+        return pdf
