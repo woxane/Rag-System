@@ -6,6 +6,7 @@ from PIL import Image
 import io
 import base64
 import os
+import glob
 
 
 class DocumentProcessor:
@@ -81,3 +82,16 @@ class DocumentProcessor:
         chunks = list(map(lambda chunk: (chunk, "None"), self.text_splitter.split_text(text)))
         pdf['chunks'] = chunks
         return pdf
+
+    def delete_images(self, file_id: str) -> List[str]:
+        pattern = os.path.join(self.base_directory, f'*{file_id}*')
+
+        files_to_delete = glob.glob(pattern)
+
+        for file_path in files_to_delete:
+            try:
+                os.remove(file_path)
+            except OSError as e:
+                print(f"Error: {file_path} : {e.strerror}")
+
+        return files_to_delete
