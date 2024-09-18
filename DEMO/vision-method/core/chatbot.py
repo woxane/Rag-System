@@ -230,7 +230,7 @@ class Chatbot:
                 reference_index = next((i for i, chunk in enumerate(near_references) if int(chunk['chunk_number']) == chunk_number), None)
                 chunk_texts = list(map(lambda chunk: chunk['text'], near_references))
 
-                if reference_index:
+                if reference_index != None:
                     chunk_texts[reference_index] = "<mark style='background-color: yellow'>" + chunk_texts[reference_index] + "</mark>"
 
                 references.append(" ".join(chunk_texts))
@@ -264,8 +264,6 @@ class Chatbot:
         client: lm_studio = lm_studio(base_url="http://localhost:1234/v1", api_key="lm-studio")
 
         analyze_prompt = "Instructions:\n" \
-                         f"- **Responde** in {response_language}.\n" \
-                         "- **Analyze** the whole image in 2 or 3 line.\n" \
                          "- **List** all features in the image.\n"\
                          "- If there is any text or table in the image describe a summary of it."
 
