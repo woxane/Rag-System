@@ -133,6 +133,16 @@ class DocumentProcessor:
 
         return results
 
+
+    def convert_table_to_markdown(table):
+        number_of_columns = len(table[0])
+
+        separator = "|" + "|".join(["---"] * number_of_columns) + "|"
+        markdown_rows = ["|" + "|".join(row) + "|" for row in table]
+        markdown_table = "\n".join([markdown_rows[0], separator] + markdown_rows[1:])
+
+        return markdown_table
+
     @classmethod
     def data_clean_up(cls):
         pattern = os.path.join(cls.base_directory, '*')
