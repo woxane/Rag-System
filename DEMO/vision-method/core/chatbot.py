@@ -151,7 +151,7 @@ class Chatbot:
         tables = pdf_data['tables']
 
         images_analyzation = [(self.analyze_image(image), file_path, image_info) for file_path, image, image_info in images]
-        tables_analyzation = [(self.analyze_table(full_table_data), page_num, table_num) for full_table_data, page_num, table_num in tables]
+        tables_analyzation = [(self.analyze_table(full_table_data), full_table_data, page_num, table_num) for full_table_data, page_num, table_num in tables]
 
         documents = []
 
@@ -167,6 +167,8 @@ class Chatbot:
                         "file_path": "",
                         "page_num": "",
                         "image_num": "",
+                        "table_num": "",
+                        "table_markdown": "",
                     }
                 )
             )
@@ -183,11 +185,13 @@ class Chatbot:
                         "file_path": file_path,
                         "page_num": str(image_info['page_num']),
                         "image_num": str(image_info['image_num']),
+                        "table_num": "",
+                        "table_markdown": "",
                     }
                 )
             )
 
-        for idx, (analyze, page_num, table_num) in enumerate(tables_analyzation, len(chunks) + len(images_analyzation)):
+        for idx, (analyze, full_table_data,  page_num, table_num) in enumerate(tables_analyzation, len(chunks) + len(images_analyzation)):
             documents.append(
                 Document(
                     page_content=analyze,
@@ -199,7 +203,8 @@ class Chatbot:
                         "file_path": "",
                         "page_num": str(page_num),
                         "image_num": "",
-                        "table_num": str(table_num)
+                        "table_num": str(table_num),
+                        "table_markdown": full_table_data,
                     }
                 )
             )
