@@ -293,6 +293,13 @@ class Chatbot:
                 except Exception as e:
                     print(e)
 
+
+            elif document.metadata['data_type'] == 'table-analyze':
+                table_markdown = document.metadata['table_markdown']
+                table_information = f"<p>This table located in {document.metadata['file_name']} at page number {document.metadata['page_num']} </p>"
+
+                references.append(table_markdown + '\n' + table_information)
+
         return references
 
     def analyze_image(self, image_base64: str, response_language: str = "Persian") -> str:
