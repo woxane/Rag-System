@@ -103,6 +103,8 @@ class DocumentProcessor:
 
         for table in tables:
             table_bbox = table.bbox
+            page.add_redact_annot(table_bbox)
+            page.apply_redactions()
 
             # Store the closest lines
             above_text = ""
