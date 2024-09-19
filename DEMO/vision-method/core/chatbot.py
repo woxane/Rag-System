@@ -46,6 +46,17 @@ class Chatbot:
                             "{question}\n" \
                             "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
 
+    _table_analyzation_prompt_template: str = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n" \
+                                              "You are an intelligent assistant with the ability to analyze and summarize data from tables.\n" \
+                                              "Instructions:\n" \
+                                              "- Look at the table provided below.\n" \
+                                              "- Provide a detailed summary that includes key insights, trends, and any notable figures from the table.\n" \
+                                              "- Ensure that your summary includes the actual data from the table where relevant.\n" \
+                                              "- The summary should be comprehensive, capturing all points and key numbers from the table.\n" \
+                                              "Table:\n" \
+                                              "{table_data}\n" \
+                                              "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
+
     _env_values: OrderedDict = dotenv_values(dotenv_path)
 
     _documentProcessor: DocumentProcessor = DocumentProcessor(chunk_size=int(_env_values["chunk_size"]))
@@ -77,11 +88,13 @@ class Chatbot:
         self.prompt_template = prompt_template
         self.limit = limit
         self._rag_prompt: PromptTemplate = PromptTemplate.from_template(prompt_template)
+        self._table_analyze_prompt: PromptTemplate = PromptTemplate.from_template(self.__class__._table_analyzation_prompt_template)
         self._retriever = self.__class__._milvus.as_retriever(search_type="similarity", search_kwargs={"k": limit})
 
         self._rag_chain = {"context": self._retriever | self._format_doc, "history": RunnableLambda(self.get_history),
                            "question": RunnablePassthrough()} | self._rag_prompt | self.__class__._llm | StrOutputParser()
 
+        self._table_analyze_chain = self._table_analyze_prompt | self.__class__._llm | StrOutputParser()
 
     def __repr__(self):
         return (f"{self.__class__.__name__}("
@@ -153,7 +166,7 @@ class Chatbot:
                         "image_num": "",
                     }
                 )
-            ) 
+            )
 
         for idx, (analyze, file_path, image_info) in enumerate(images_analyzation, len(chunks)):
             documents.append(
@@ -169,7 +182,7 @@ class Chatbot:
                         "image_num": str(image_info['image_num']),
                     }
                 )
-            )   
+            )
 
         document_ids: List[str] = [str(uuid4()) for _ in documents]
         self.__class__._milvus.add_documents(documents=documents, ids=document_ids)
@@ -257,35 +270,32 @@ class Chatbot:
 
         return references
 
-
-
     def analyze_image(self, image_base64: str, response_language: str = "Persian") -> str:
         llava_model_name = "xtuner/llava-llama-3-8b-v1_1-gguf"
         client: lm_studio = lm_studio(base_url="http://localhost:1234/v1", api_key="lm-studio")
 
         analyze_prompt = "Instructions:\n" \
-                         "- **List** all features in the image.\n"\
+                         "- **List** all features in the image.\n" \
                          "- If there is any text or table in the image describe a summary of it."
-
 
         completion = client.chat.completions.create(
             model=llava_model_name,
             messages=[
                 {
-                "role": "system",
-                "content": "This is a chat between a user and an assistant. The assistant is helping the user to describe an image.\n" + analyze_prompt,
+                    "role": "system",
+                    "content": "This is a chat between a user and an assistant. The assistant is helping the user to describe an image.\n" + analyze_prompt,
                 },
                 {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": "analyze this image for me."},
-                    {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/png;base64,{image_base64}"
-                    },
-                    },
-                ],
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "analyze this image for me."},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/png;base64,{image_base64}"
+                            },
+                        },
+                    ],
                 }
             ],
             max_tokens=500,
@@ -293,6 +303,10 @@ class Chatbot:
         )
 
         return completion.choices[0].message.content
+
+
+    def analyze_table(self, table_markdown):
+        return self._table_analyze_chain.invoke(table_markdown)
 
 
 
