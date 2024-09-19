@@ -263,6 +263,8 @@ class Chatbot:
                     key=lambda data: data['chunk_number']
                 )
 
+                near_references = filter(lambda file_data: file_data['data_type'] == 'text', near_references)
+
                 near_references = sorted(near_references, key=lambda data: data['chunk_number'])
 
                 reference_index = next((i for i, chunk in enumerate(near_references) if int(chunk['chunk_number']) == chunk_number), None)
@@ -286,7 +288,7 @@ class Chatbot:
                     image_b64 = base64.b64encode(buffered.getvalue()).decode()
 
                     image_tag = f'<img src="data:{mime_type};base64,{image_b64}" alt="alt text">'
-                    information_tag = f"<p>This image located in {document.metadata['file_name']} at page number {document.metadata['page_num']} </p>"
+                    information_tag = f"<p>This image located in <b>{document.metadata['file_name']}</b> at page number <b>{document.metadata['page_num']}</b> </p>"
 
                     references.append(image_tag + '\n' + information_tag)
 
@@ -296,7 +298,7 @@ class Chatbot:
 
             elif document.metadata['data_type'] == 'table-analyze':
                 table_markdown = document.metadata['table_markdown']
-                table_information = f"<p>This table located in {document.metadata['file_name']} at page number {document.metadata['page_num']} </p>"
+                table_information = f"<p>This table located in <b>{document.metadata['file_name']}</b> at page number <b>{document.metadata['page_num']}</b> </p>"
 
                 references.append(table_markdown + '\n' + table_information)
 
