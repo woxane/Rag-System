@@ -148,7 +148,10 @@ class Chatbot:
         pdf_data = self.__class__._documentProcessor.load_pdf(file=file)
         chunks = pdf_data['chunks']
         images = pdf_data['images']
+        tables = pdf_data['tables']
+
         images_analyzation = [(self.analyze_image(image), file_path, image_info) for file_path, image, image_info in images]
+        tables_analyzation = [(self.analyze_table(full_table_data), page_num, table_num) for full_table_data, page_num, table_num in tables]
 
         documents = []
 
@@ -180,6 +183,23 @@ class Chatbot:
                         "file_path": file_path,
                         "page_num": str(image_info['page_num']),
                         "image_num": str(image_info['image_num']),
+                    }
+                )
+            )
+
+        for idx, (analyze, page_num, table_num) in enumerate(tables_analyzation, len(chunks) + len(images_analyzation)):
+            documents.append(
+                Document(
+                    page_content=analyze,
+                    metadata={
+                        "file_id": file.file_id,
+                        "file_name": file.name,
+                        "chunk_number": idx + 1,
+                        "data_type": "table-analyze",
+                        "file_path": "",
+                        "page_num": str(page_num),
+                        "image_num": "",
+                        "table_num": str(table_num)
                     }
                 )
             )
