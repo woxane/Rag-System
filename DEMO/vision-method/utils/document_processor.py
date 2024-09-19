@@ -95,6 +95,44 @@ class DocumentProcessor:
 
         return files_to_delete
 
+
+    def extract_tables(page):
+        text_data = page.get_text("dict")
+        tables = page.find_tables()
+        results = []
+
+        for table in tables:
+            table_bbox = table.bbox
+
+            # Store the closest lines
+            above_text = ""
+            below_text = ""
+
+            closest_above_y = float('-inf')
+            closest_below_y = float('inf')
+
+            for block in text_data["blocks"]:
+                for line in block["lines"]:
+                    for span in line["spans"]:
+                        text_bbox = span["bbox"]
+
+                        if table_bbox[1] > text_bbox[3] > closest_above_y:
+                            above_text = span["text"]
+                            closest_above_y = text_bbox[3]
+
+                        elif table_bbox[3] < text_bbox[1] < closest_below_y:
+                            below_text = span["text"]
+                            closest_below_y = text_bbox[1]
+
+            table_with_context = {
+                "above_text": above_text.strip(),
+                "table": table,
+                "below_text": below_text.strip()
+            }
+            results.append(table_with_context)
+
+        return results
+
     @classmethod
     def data_clean_up(cls):
         pattern = os.path.join(cls.base_directory, '*')
