@@ -122,17 +122,19 @@ class DocumentProcessor:
             closest_below_y = float('inf')
 
             for block in text_data["blocks"]:
-                for line in block["lines"]:
-                    for span in line["spans"]:
-                        text_bbox = span["bbox"]
+                # if the block type is text (0: text, 1: image)
+                if block['type'] == 0:
+                    for line in block["lines"]:
+                        for span in line["spans"]:
+                            text_bbox = span["bbox"]
 
-                        if table_bbox[1] > text_bbox[3] > closest_above_y:
-                            above_text = span["text"]
-                            closest_above_y = text_bbox[3]
+                            if table_bbox[1] > text_bbox[3] > closest_above_y:
+                                above_text = span["text"]
+                                closest_above_y = text_bbox[3]
 
-                        elif table_bbox[3] < text_bbox[1] < closest_below_y:
-                            below_text = span["text"]
-                            closest_below_y = text_bbox[1]
+                            elif table_bbox[3] < text_bbox[1] < closest_below_y:
+                                below_text = span["text"]
+                                closest_below_y = text_bbox[1]
 
             table_with_context = {
                 "above_text": above_text.strip(),
