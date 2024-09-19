@@ -12,6 +12,7 @@ import glob
 class DocumentProcessor:
     _separators: List[str] = [".", ","]
     base_directory = ".data/"
+
     def __init__(self, chunk_size: int = 400):
         self.chunk_size = chunk_size
         self.text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(
@@ -40,10 +41,18 @@ class DocumentProcessor:
         # TODO: change the way of saving file path
         pdf_document = fitz.open(stream=file.read(), filetype="pdf")
         text = ""
-        pdf = {"chunks": [], "images": []}
+        pdf = {"chunks": [], "images": [], "tables": []}
 
         for page_num in range(len(pdf_document)):
             page = pdf_document.load_page(page_num)
+
+            tables_datas = self.extract_tables(page)
+
+            for table_num, table in enumerate(tables_datas):
+                table_markdown = self.convert_table_to_markdown(table['table'].extract())
+                full_tabel_data = table['above_text'] + '\n' + table_markdown + '\n' + table['below_text']
+                pdf['tables'].append((full_tabel_data, page_num, table_num))
+
             text += page.get_text()
 
             images = page.get_images(full=True)
@@ -95,8 +104,7 @@ class DocumentProcessor:
 
         return files_to_delete
 
-
-    def extract_tables(page):
+    def extract_tables(self, page):
         text_data = page.get_text("dict")
         tables = page.find_tables()
         results = []
@@ -135,8 +143,7 @@ class DocumentProcessor:
 
         return results
 
-
-    def convert_table_to_markdown(table):
+    def convert_table_to_markdown(self, table):
         number_of_columns = len(table[0])
 
         separator = "|" + "|".join(["---"] * number_of_columns) + "|"
