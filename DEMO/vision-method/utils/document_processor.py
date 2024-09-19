@@ -50,7 +50,7 @@ class DocumentProcessor:
 
             for table_num, table in enumerate(tables_datas):
                 table_markdown = self.convert_table_to_markdown(table['table'].extract())
-                full_tabel_data = table['above_text'] + '\n' + table_markdown + '\n' + table['below_text']
+                full_tabel_data = '\n' + table['above_text'] + '\n' + table_markdown + '\n' + table['below_text']
                 pdf['tables'].append((full_tabel_data, page_num, table_num))
 
             text += page.get_text()
