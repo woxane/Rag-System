@@ -3,24 +3,25 @@ from typing import List, Dict
 
 def encode_history(user_header_tag: str, assistant_header_tag: str, histories: List[Dict[str, str]]) -> str:
     """
-    Encodes a list of user-assistant history exchanges into a formatted string.
+    Encode conversation history into a formatted string.
 
-    This function takes in a list of conversation histories, Then formats each history into a structured string
-    with specified header tags for the user and assistant,
-    appending each interaction to a final string that is returned.
+    This function processes a list of exchanges between a user and an assistant, formatting each entry with specified header tags for clarity. It creates a structured string that represents the entire conversation history.
 
     Parameters:
-    user_header_tag (str) : A header tag that will be placed above each user's message.
-        For Example: <|eot_id|><|start_header_id|>user<|end_header_id|>
+    -----------
+    user_header_tag : str
+        A header tag to be placed above each user's message. For example: <|eot_id|><|start_header_id|>user<|end_header_id|>.
 
-    assistant_header_tag (str) : A header tag that will be placed above each assistant's response.
-        For Example: <|eot_id|><|start_header_id|>assistant<|end_header_id|>
+    assistant_header_tag : str
+        A header tag to be placed above each assistant's response. For example: <|eot_id|><|start_header_id|>assistant<|end_header_id>.
 
-    histories (List[Dict[str, str]]): A list of dictionaries, where each dictionary represents a single interaction
-        between the user and the assistant. Each dictionary must have the keys "user" and "assistant".
+    histories : List[Dict[str, str]]
+        A list of dictionaries, where each dictionary represents a single interaction. Each dictionary must contain the keys "role" (indicating either 'user' or 'assistant') and "content" (the message text).
 
-    Returns (str): A formatted string that concatenates all user and assistant messages, each prefixed by
-        their respective header tags.
+    Returns:
+    --------
+    str
+        A formatted string that concatenates all user and assistant messages, each prefixed by their respective header tags, excluding any responses marked as 'assistant' with references.
     """
 
     history_structure: str = ""
