@@ -16,6 +16,18 @@ class ChatInterface:
                     st.markdown(message["content"], unsafe_allow_html=True)
 
     def run(self):
+        """
+        Launches the Streamlit application for the PDF Helper.
+
+        This method sets up the Streamlit interface, initializes session states for files and messages,
+        and allows users to upload PDF files. It handles file uploads, displays the current status of
+        uploaded files, and manages the chat interface for user interactions with the assistant.
+
+        Key Features:
+        - Upload and manage multiple PDF files.
+        - Display chat history and responses from the assistant.
+        - Implement a hover effect for references in responses.
+        """
         st.title("PDF Helper")
 
         # Initialize session state for pdf_texts and messages if not already present
