@@ -10,16 +10,21 @@ import glob
 
 
 class DocumentProcessor:
+    # Define a list of separators for splitting text
     _separators: List[str] = [".", ","]
+
+    # Set the base directory for data storage
     base_directory = ".data/"
 
     def __init__(self, chunk_size: int = 400):
         self.chunk_size = chunk_size
+
+        # Create a text splitter using recursive character-based splitting
         self.text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(
-            separators=self._separators,
-            chunk_size=chunk_size,
-            length_function=len,
-            is_separator_regex=False,
+            separators=self._separators,  # Use defined separators for splitting
+            chunk_size=chunk_size,  # Set the maximum size of each chunk
+            length_function=len,  # Function to determine the length of the text
+            is_separator_regex=False,  # Indicate that separators are not regex patterns
         )
 
     def __repr__(self):
