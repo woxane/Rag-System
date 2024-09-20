@@ -126,7 +126,27 @@ class DocumentProcessor:
 
         return files_to_delete
 
-    def extract_tables(self, page):
+    def extract_tables(self, page) -> List[Dict[str, Any]]:
+        """
+        Extract tables and their contextual text from a PDF page.
+
+        This method identifies tables within a specified page of a PDF document and retrieves the text located above and below each table.
+        It applies redaction annotations to the tables and organizes the extracted information into a structured format for further processing.
+
+        Parameters:
+        -----------
+        page : Page
+            The page object from which tables and contextual text are to be extracted.
+
+        Returns:
+        --------
+        List[Dict[str, Any]]
+            A list of dictionaries, each containing:
+                - 'above_text': The text located immediately above the table.
+                - 'table': The table object extracted from the page.
+                - 'below_text': The text located immediately below the table.
+        """
+
         text_data = page.get_text("dict")
         tables = page.find_tables()
         results = []
