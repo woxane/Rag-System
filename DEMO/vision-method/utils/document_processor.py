@@ -213,7 +213,21 @@ class DocumentProcessor:
         return markdown_table
 
     @classmethod
-    def data_clean_up(cls):
+    def data_clean_up(cls) -> None:
+        """
+        Clean up the directory by deleting all files matching the specified pattern.
+
+        This class method searches for and removes all files in the base directory.
+        It attempts to delete each file and reports any errors encountered during the deletion process.
+
+        Parameters:
+        -----------
+        None
+
+        Returns:
+        --------
+        None
+        """
         pattern = os.path.join(cls.base_directory, '*')
 
         files_to_delete = glob.glob(pattern)
