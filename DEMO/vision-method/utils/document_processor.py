@@ -27,18 +27,23 @@ class DocumentProcessor:
 
     def load_pdf(self, file) -> Dict[str, List[Any]]:
         """
-        Extracts text and images from a PDF file and splits it into chunks (just texts)
+        Extract text and images from a PDF file and split the text into chunks.
 
-        This method using split the text using langchain.text_splitter.RecursiveCharacterTextSplitter to split the text.
+        This method opens a PDF file, extracts its text and images, and processes them. It uses the `RecursiveCharacterTextSplitter` from LangChain to divide the text into manageable chunks. The images are converted to base64 format and saved to a specified directory, while the extracted tables are also organized for further use.
 
         Parameters:
-        file (file | streamlit file_uploader like objects): returning object of streamlit.file_uploader
+        -----------
+        file : file or streamlit file_uploader-like object
+            A file object returned by streamlit's file_uploader or similar objects, representing the PDF to be processed.
 
         Returns:
-        Dict[str, List[Any]] = chunks: chunks that separated using RecursiveCharacterTextSplitter
-                               images: images that finded in the pdf file.
+        --------
+        Dict[str, List[Any]]
+            A dictionary containing:
+                - 'chunks': A list of text chunks obtained by splitting the PDF text.
+                - 'images': A list of tuples containing the file path, base64-encoded image data, and metadata for each extracted image.
+                - 'tables': A list of tuples with extracted table data and their associated page and table numbers.
         """
-        # TODO: change the way of saving file path
         pdf_document = fitz.open(stream=file.read(), filetype="pdf")
         text = ""
         pdf = {"chunks": [], "images": [], "tables": []}
