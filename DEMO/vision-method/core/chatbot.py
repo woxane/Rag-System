@@ -131,16 +131,22 @@ class Chatbot:
 
     def save_pdf(self, file) -> None:
         """
-        Save embedded chunks into Milvus db.
+        Save a PDF file and its content into the Milvus database.
 
-        This method get PDF file and split it using DocumentProcessor class and convert them into vectors
-        and save it into Milvus db.
+        This method processes the input PDF file by extracting its text, images, and tables, converting them into vector representations
+        and storing them in the Milvus database.
+        It utilizes the DocumentProcessor class to split the PDF into chunks and analyze each component, including text, images, and tables.
+        For each component, it creates a `Document` object with appropriate metadata and stores these objects in the Milvus database.
 
         Parameters:
-        file (file | streamlit file_uploader like objects): returning object of streamlit.file_uploader
+        -----------
+        file : file or streamlit file_uploader-like object
+            A file object returned by streamlit's file_uploader or similar objects, representing the PDF to be processed.
 
         Returns:
+        --------
         None
+            The function doesn't return any value; it stores the extracted and processed data directly into the Milvus database.
         """
 
         pdf_data = self.__class__._documentProcessor.load_pdf(file=file)
