@@ -40,15 +40,18 @@ class EnvManager:
 
     def update_env(self) -> None:
         """
-        Update environment variables.
+        Update existing environment variables.
 
-        This method iterate on variables that is in the dotenv that specified and if there is anything that user
-        wants to change it, it will update it.
+        This method allows users to review and edit environment variables specified in a dotenv file.
+        It iterates through each variable, displaying its current value and prompting the user to decide if they want to change it.
+        If the user chooses to edit a variable, they are prompted to enter a new value.
 
-        Parameter:
+        Parameters:
+        -----------
         None
 
         Returns:
+        --------
         None
         """
         env_values: OrderedDict = dotenv_values(self.path)
