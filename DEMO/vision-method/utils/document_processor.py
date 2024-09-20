@@ -187,7 +187,23 @@ class DocumentProcessor:
 
         return results
 
-    def convert_table_to_markdown(self, table):
+    def convert_table_to_markdown(self, table: List[List[str]]) -> str:
+        """
+        Convert a table to Markdown format.
+
+        This method takes a two-dimensional list representing a table and converts it into a Markdown-formatted string.
+        It creates a separator for the columns and formats the rows appropriately.
+
+        Parameters:
+        -----------
+        table : List[List[str]]
+            A list of lists, where each inner list represents a row of the table and contains string values for each column.
+
+        Returns:
+        --------
+        str
+            A string representation of the table in Markdown format.
+        """
         number_of_columns = len(table[0])
 
         separator = "|" + "|".join(["---"] * number_of_columns) + "|"
