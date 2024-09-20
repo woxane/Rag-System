@@ -240,16 +240,20 @@ class Chatbot:
 
     def get_formatted_references(self) -> List[str]:
         """
-        Get texts near the real reference by given chunk_number.
+        Retrieve and format reference texts or data near a specified chunk number.
 
-        This method Filters and sorts the chunks based on their proximity to the given chunk_number.
+        This method filters and sorts text, image, and table chunks based on their proximity to a provided chunk number, returning them in a formatted way.
+        It highlights text chunks near the reference and provides base64-encoded image and table data.
+        The references are fetched from `_used_contexts` and queried from the Milvus database.
 
         Parameters:
-        file_id (list): The file id of the reference text.
-        chunk_number (int): The reference chunk number to filter around.
+        -----------
+        None
 
         Returns:
-            list: Sorted list of chunks near the specified chunk_number.
+        --------
+        List[str]
+            A sorted list of formatted references (texts, images, or tables) around the specified chunk number. Each reference is provided with the necessary context, such as chunk number, file name, and page number.
         """
 
         documents = self._used_contexts
