@@ -343,7 +343,7 @@ class Chatbot:
         """
         Analyze an image and provide a detailed description.
 
-        This method sends an image (in base64 format) to an Vision model hosted locally, which analyzes the image and returns a description.
+        This method sends an image (in base64 format) to a Vision model hosted locally, which analyzes the image and returns a description.
         The analysis includes listing features of the image and summarizing any text or table found within the image.
 
         Parameters:
@@ -391,15 +391,15 @@ class Chatbot:
 
     def analyze_table(self, table_markdown: str) -> str:
         """
-        Analyze a table provided in markdown format.
+        Analyze a table provided in Markdown format.
 
-        This method processes a table in markdown format using a pre-defined table analysis chain.
+        This method processes a table in Markdown format using a pre-defined table analysis chain.
         It passes the table data through the chain and returns the result of the analysis.
 
         Parameters:
         -----------
         table_markdown : str
-            The table content in markdown format to be analyzed.
+            The table content in Markdown format to be analyzed.
 
         Returns:
         --------
