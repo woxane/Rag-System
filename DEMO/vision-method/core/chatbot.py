@@ -395,15 +395,20 @@ class Chatbot:
 
     def _format_doc(self, docs: List[Document]) -> str:
         """
-        Joins page_content of each element using \n\n.
+        Format a list of documents by joining their content.
 
-        This method get searched documents and a tag with a specifc ID as a chunk number to each one of them.
+        This method takes a list of `Document` objects and joins the `page_content` of each document into a single string, separated by double newlines.
+        It also updates the `_used_contexts` attribute with the provided documents for potential future reference.
 
         Parameters:
-        docs (List[Documents]): List of searched documents.
+        -----------
+        docs : List[Document]
+            A list of searched documents containing the content to be formatted.
 
         Returns:
-        str: output of joins on the page contents.
+        --------
+        str
+            A single string containing the combined page contents of the documents, separated by double newlines.
         """
         self._used_contexts = list(docs)
 
