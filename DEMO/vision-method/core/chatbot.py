@@ -26,9 +26,11 @@ dotenv_path = '.env'
 
 
 class Chatbot:
+    # User and assistant header tags for conversation context
     _user_header_tag: str = "<|eot_id|><|start_header_id|>user<|end_header_id|>"
     _assistant_header_tag: str = "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
 
+    # Template for the prompt sent to the assistant, including system instructions
     _prompt_template: str = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n" \
                             "You are an intelligent assistant." \
                             "You always provide well-reasoned answers that are both correct and helpful.\n" \
@@ -45,7 +47,7 @@ class Chatbot:
                             "<|eot_id|><|start_header_id|>user<|end_header_id|>\n" \
                             "{question}\n" \
                             "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-
+    # Template for analyzing tables, with instructions for the assistant
     _table_analyzation_prompt_template: str = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n" \
                                               "You are an intelligent assistant with the ability to analyze and summarize data from tables.\n" \
                                               "Instructions:\n" \
@@ -56,21 +58,24 @@ class Chatbot:
                                               "Table:\n" \
                                               "{table_data}\n" \
                                               "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-
+    # Load environment variables from a .env file
     _env_values: OrderedDict = dotenv_values(dotenv_path)
 
+    # Initialize DocumentProcessor with a specified chunk size
     _documentProcessor: DocumentProcessor = DocumentProcessor(chunk_size=int(_env_values["chunk_size"]))
 
+    # Specify the embedding model and its parameters
     _embedding_model_name = "Alibaba-NLP/gte-multilingual-base"
     _embedding_model_kwargs = {"trust_remote_code": True}
     _embedding: HuggingFaceEmbeddings = HuggingFaceEmbeddings(model_name=_embedding_model_name,
                                                               model_kwargs=_embedding_model_kwargs)
 
-    # Do not check the token length of inputs and automatically split inputs
-    # longer than embedding_ctx_length. (Won't work with nomic-embed-text)
+    # Initialize the OpenAI model for generating responses
     _llm: OpenAI = OpenAI(base_url=_env_values["openAI_base_url"],
                           api_key=_env_values["openAI_api_key"],
                           model=_env_values["LLM_model_name"])
+
+    # Configure the Milvus database connection for storing embeddings
     _milvus: Milvus = Milvus(
         embedding_function=_embedding,
         connection_args={"uri": _env_values["milvus_uri"]},
@@ -78,23 +83,26 @@ class Chatbot:
         drop_old=True,
     )
 
+    # Initialize a Milvus client for managing the database
     _pymilvus_client: MilvusClient = MilvusClient(
         uri=_env_values["milvus_uri"]
     )
 
     def __init__(self, prompt_template: str = _prompt_template, limit: int = 3):
-        self._history = None
-        self._used_contexts = []
-        self.prompt_template = prompt_template
-        self.limit = limit
-        self._rag_prompt: PromptTemplate = PromptTemplate.from_template(prompt_template)
+        self._history = None  # Stores the history of the conversation
+        self._used_contexts = []  # Keeps track of latest contexts used in the conversation
+        self.prompt_template = prompt_template  # Sets the prompt template
+        self.limit = limit  # Sets the maximum number of results to retrieve
+        self._rag_prompt: PromptTemplate = PromptTemplate.from_template(prompt_template)  # Creates a prompt template for RAG
         self._table_analyze_prompt: PromptTemplate = PromptTemplate.from_template(
-            self.__class__._table_analyzation_prompt_template)
-        self._retriever = self.__class__._milvus.as_retriever(search_type="similarity", search_kwargs={"k": limit})
+            self.__class__._table_analyzation_prompt_template)  # Creates a prompt template for table analysis
+        self._retriever = self.__class__._milvus.as_retriever(search_type="similarity", search_kwargs={"k": limit})  # Configures the retriever
 
+        # Define the RAG chain combining context retrieval, formatting, and response generation
         self._rag_chain = {"context": self._retriever | self._format_doc, "history": RunnableLambda(self.get_history),
                            "question": RunnablePassthrough()} | self._rag_prompt | self.__class__._llm | StrOutputParser()
 
+        # Define the table analysis chain for summarizing table data
         self._table_analyze_chain = self._table_analyze_prompt | self.__class__._llm | StrOutputParser()
 
     def __repr__(self):
