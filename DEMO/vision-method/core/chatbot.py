@@ -218,15 +218,21 @@ class Chatbot:
 
     def delete_pdf(self, file_id: str):
         """
-        Delete vectors from a pdf file from Milvus db.
+        Delete vectors associated with a PDF file from the Milvus database.
 
-        This method deletes every vector from chunks of a specific PDF from milvus using their file_id.
+        This method removes all vector data related to the chunks of a specific PDF file stored in the Milvus database.
+        It identifies the vectors using the `file_id` and deletes the corresponding records.
+        Additionally, it handles the removal of any images associated with the PDF through the DocumentProcessor class.
 
         Parameters:
-        file_id (str): the file_id that streamlit provide to each uploaded file.
+        -----------
+        file_id : str
+            The unique identifier assigned to each uploaded file, used to locate and delete its corresponding vectors in the database.
 
         Returns:
+        --------
         None
+            The function doesn't return any value; it removes the relevant data from the Milvus database.
         """
         documents_id: List[str] = self.__class__._milvus.get_pks(expr=f"file_id == '{file_id}'")
         deleted_images: List[str] = self.__class__._documentProcessor.delete_images(file_id=file_id)
