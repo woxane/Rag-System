@@ -142,8 +142,6 @@ class Chatbot:
         Returns:
         None
         """
-        # TODO: change the way of saving file path
-        docs = []
 
         pdf_data = self.__class__._documentProcessor.load_pdf(file=file)
         chunks = pdf_data['chunks']
