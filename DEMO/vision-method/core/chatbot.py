@@ -417,7 +417,37 @@ class Chatbot:
         return formated_documents
 
     def get_history(self, _):
+        """
+        Retrieve the history of interactions.
+
+        This method returns the stored history of interactions that have taken place, which may include previous questions and answers.
+
+        Parameters:
+        -----------
+        _ : Any
+            An unused parameter, kept for consistency in method signatures.
+
+        Returns:
+        --------
+        Any
+            The stored history of interactions.
+        """
         return self._history
 
     def get_latest_context(self):
+        """
+        Get the most recent contexts used for processing.
+
+        This method returns the latest set of contexts (documents) that have been used for processing within the system.
+        These contexts can be utilized for further interactions or analyses.
+
+        Parameters:
+        -----------
+        None
+
+        Returns:
+        --------
+        List[Document]
+            A list of the most recently used document contexts.
+        """
         return self._used_contexts
