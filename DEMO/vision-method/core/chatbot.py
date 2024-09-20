@@ -104,17 +104,24 @@ class Chatbot:
 
     def get_response(self, query: str, history: List[Dict[str, str]], stream: bool = False) -> Iterator[str] | str:
         """
-        Get response from LLM model.
+        Retrieve a response from the LLM model based on the user's query.
 
-        This method using the chain that we create it constructor calls the model and return the answer.
+        This method uses the predefined chain to interact with the language model, processing the user's query along with the chat history.
+        It can return the response in a streamed format if specified.
 
         Parameters:
-        query (str): user question without embeddings.
-        history (str): that chat history between user and model.
-        stream (bool): if true return streamed version of answer
+        -----------
+        query : str
+            The question posed by the user, without any embeddings.
+        history : List[Dict[str, str]]
+            The chat history containing previous exchanges between the user and the model.
+        stream : bool, optional
+            If set to True, the method returns a streamed version of the response; otherwise, it returns the complete response (default is False).
 
         Returns:
-        str: output of chain invoke
+        --------
+        Iterator[str] | str
+            The output of the chain invocation, which can either be a streamed response or a single complete response.
         """
 
         self._history = encode_history(
