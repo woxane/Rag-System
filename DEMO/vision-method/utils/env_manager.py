@@ -21,14 +21,17 @@ class EnvManager:
 
     def setup_env(self) -> None:
         """
-        First time setup environment variable.
+        First time setup for environment variables.
 
-        This method set value for settings from user with iterating in _environment_items.
+        This method initializes environment variables by prompting the user for their values, iterating over a predefined list of environment items.
+        If the user provides no input, a recommended default value is used.
 
-        Parameter:
+        Parameters:
+        -----------
         None
 
         Returns:
+        --------
         None
         """
         for (key, prompt_text), recommended_value in self._environment_items:
