@@ -29,7 +29,8 @@ class DocumentProcessor:
         """
         Extract text and images from a PDF file and split the text into chunks.
 
-        This method opens a PDF file, extracts its text and images, and processes them. It uses the `RecursiveCharacterTextSplitter` from LangChain to divide the text into manageable chunks. The images are converted to base64 format and saved to a specified directory, while the extracted tables are also organized for further use.
+        This method opens a PDF file, extracts its text and images, and processes them. It uses the `RecursiveCharacterTextSplitter` from LangChain to divide the text into manageable chunks.
+        The images are converted to base64 format and saved to a specified directory, while the extracted tables are also organized for further use.
 
         Parameters:
         -----------
@@ -97,6 +98,22 @@ class DocumentProcessor:
         return pdf
 
     def delete_images(self, file_id: str) -> List[str]:
+        """
+        Delete images associated with a specific file ID.
+
+        This method searches for and removes image files from the filesystem that match the given file ID.
+        It uses a pattern to identify files and attempts to delete each one, reporting any errors encountered during the deletion process.
+
+        Parameters:
+        -----------
+        file_id : str
+            The identifier associated with the images to be deleted. This ID is used to match files in the specified directory.
+
+        Returns:
+        --------
+        List[str]
+            A list of file paths for the images that were attempted to be deleted. This list may include files that could not be removed due to errors.
+        """
         pattern = os.path.join(self.__class__.base_directory, f'*{file_id}*')
 
         files_to_delete = glob.glob(pattern)
