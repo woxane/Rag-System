@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 import streamlit as st
 from chatbot import Chatbot
 import re
@@ -9,7 +11,17 @@ class ChatInterface:
     def __init__(self):
         self.chatbot = Chatbot()
 
-    def display_chat(self, messages):
+    def display_chat(self, messages: List[Dict[str, str]]) -> None:
+        """
+        Displays chat messages in the Streamlit application.
+
+        This method iterates through the provided list of messages and renders them in the chat interface.
+        It only displays messages from the user and the assistant (excluding those tagged as
+        'assistant_without_references').
+
+        Parameters:
+        messages (List[Dict[str, str]]): A list of message dictionaries containing the role and content of each message.
+        """
         for message in messages:
             if message['role'] != 'assistant_without_references':
                 with st.chat_message(message["role"]):
